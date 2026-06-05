@@ -49,6 +49,8 @@ For third-party boards, install or configure their Arduino CLI package index fir
 
 The Board panel in the web app shows an upload readiness checklist before compile/upload. It checks the local agent, Arduino CLI, FQBN target, USB port, required libraries, and wiring diagnostics so beginners can fix setup issues before seeing raw compiler output.
 
+The same panel also includes a serial console. Choose a baud rate, open Monitor, then send commands with no ending, newline, carriage return, or both NL + CR. The agent passes the baud rate to Arduino CLI monitor with `--config baudrate=<value>`.
+
 ## Troubleshooting
 
 - If the app says the agent is offline, run `npm run dev:agent`.

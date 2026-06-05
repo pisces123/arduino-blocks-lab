@@ -927,6 +927,105 @@ button:disabled {
   border-radius: 8px;
 }
 
+.serial-console {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.serial-console-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.serial-console-heading strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #073d66;
+  font-size: 13px;
+}
+
+.serial-console-heading span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.serial-settings {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 8px;
+}
+
+.serial-settings label {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.serial-settings label span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.serial-settings input,
+.serial-settings select,
+.serial-send-row input {
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.serial-settings input {
+  font-family: "SFMono-Regular", Consolas, monospace;
+}
+
+.serial-send-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 36px 36px;
+  gap: 7px;
+}
+
+.serial-send-row button {
+  width: 36px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+}
+
+.serial-transcript {
+  min-height: 72px;
+  max-height: 138px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  overflow: auto;
+  padding: 9px;
+  border-radius: 8px;
+  background: #08283f;
+  color: #dff7ea;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.serial-transcript span {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
 .agent-log {
   display: flex;
   flex-direction: column;

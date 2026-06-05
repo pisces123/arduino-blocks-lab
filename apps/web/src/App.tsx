@@ -7,6 +7,7 @@ import {
   Code2,
   Cpu,
   Download,
+  Eraser,
   FolderOpen,
   Gauge,
   Globe2,
@@ -20,6 +21,7 @@ import {
   Save,
   Search,
   Send,
+  MessageSquareText,
   Sparkles,
   SquareStack,
   Terminal,
@@ -45,6 +47,7 @@ import { createWokwiDiagram, unsupportedWokwiComponents } from "./wokwiExport";
 import { importedPackFromManifest, parseStoredExtensionPacks, serializeExtensionPacks, type ImportedExtensionPack } from "./extensionPacks";
 import { parseStoredProject, serializeProject } from "./projectStorage";
 import { collectUploadReadiness, type AgentCliStatus, type UploadChecklistState } from "./uploadReadiness";
+import { appendSerialLineEnding, commonBaudRates, lineEndingLabel, normalizeBaudRate, type SerialLineEnding } from "./serialConsole";
 
 type Mode = "blocks" | "code" | "lessons";
 type CodeView = "cpp" | "python" | "javascript";
@@ -331,6 +334,10 @@ export default function App() {
   const [boardSearch, setBoardSearch] = useState("");
   const [boardTargets, setBoardTargets] = useState<BoardTarget[]>([]);
   const [serialOpen, setSerialOpen] = useState(false);
+  const [serialBaudRate, setSerialBaudRate] = useState("9600");
+  const [serialLineEnding, setSerialLineEnding] = useState<SerialLineEnding>("newline");
+  const [serialInput, setSerialInput] = useState("");
+  const [serialTranscript, setSerialTranscript] = useState<string[]>(["Serial monitor is closed."]);
   const [selectedCategory, setSelectedCategory] = useState<ComponentDefinition["category"]>("output");
   const [componentSearch, setComponentSearch] = useState("");
   const [missionProgress, setMissionProgress] = useState<Record<string, boolean>>(loadMissionProgress);
@@ -359,6 +366,7 @@ export default function App() {
       }),
     [agentOnline, cliStatus, effectiveFqbn, externalLibraries, selectedPort, wiringDiagnostics]
   );
+  const readyToMonitor = agentOnline && Boolean(cliStatus?.available) && Boolean(selectedPort.trim());
   const criticalWiringCount = wiringDiagnostics.filter((diagnostic) => diagnostic.severity !== "tip").length;
   const completedMissionCount = activeCatalog.lessons.filter((lesson) => missionProgress[lesson.id]).length;
   const nextMission = activeCatalog.lessons.find((lesson) => !missionProgress[lesson.id]) ?? activeCatalog.lessons[0];
@@ -402,7 +410,9 @@ export default function App() {
     const socket = openAgentEvents((message) => {
       const payload = message as { type?: string; data?: string; port?: string };
       if (payload.type?.startsWith("serial.")) {
-        setAgentLog((current) => [`${payload.port ?? "serial"}: ${payload.data ?? payload.type}`, ...current].slice(0, 80));
+        const line = `${payload.port ?? "serial"}: ${payload.data ?? payload.type}`.trim();
+        setAgentLog((current) => [line, ...current].slice(0, 80));
+        setSerialTranscript((current) => [line, ...current].slice(0, 120));
       }
     });
     return () => socket.close();
@@ -533,13 +543,39 @@ export default function App() {
 
   async function toggleSerialMonitor() {
     if (!selectedPort) return;
+    const baudRate = normalizeBaudRate(serialBaudRate);
     const response = await agentRpc(serialOpen ? "serial.close" : "serial.open", {
       port: selectedPort,
-      fqbn: effectiveFqbn
+      fqbn: effectiveFqbn,
+      baudRate
     });
-    if (response.ok) setSerialOpen(!serialOpen);
+    if (response.ok) {
+      const nextOpen = !serialOpen;
+      setSerialOpen(nextOpen);
+      setSerialTranscript((current) => [
+        nextOpen ? `Opened ${selectedPort} at ${baudRate} baud.` : `Closed ${selectedPort}.`,
+        ...current
+      ].slice(0, 120));
+    }
     setAgentLog((current) => [
-      response.ok ? `${serialOpen ? "Closed" : "Opened"} serial monitor on ${selectedPort}.` : `Serial monitor failed: ${response.error}`,
+      response.ok ? `${serialOpen ? "Closed" : "Opened"} serial monitor on ${selectedPort} at ${baudRate} baud.` : `Serial monitor failed: ${response.error}`,
+      ...current
+    ]);
+  }
+
+  async function sendSerialMessage() {
+    const message = serialInput;
+    if (!serialOpen || !message) return;
+    const response = await agentRpc("serial.write", {
+      port: selectedPort,
+      data: appendSerialLineEnding(message, serialLineEnding)
+    });
+    if (response.ok) {
+      setSerialInput("");
+      setSerialTranscript((current) => [`> ${message}`, ...current].slice(0, 120));
+    }
+    setAgentLog((current) => [
+      response.ok ? `Sent serial message using ${lineEndingLabel(serialLineEnding).toLowerCase()}.` : `Serial send failed: ${response.error}`,
       ...current
     ]);
   }
@@ -1083,7 +1119,7 @@ export default function App() {
                 <Send size={16} />
                 Upload
               </button>
-              <button disabled={!selectedPort} onClick={toggleSerialMonitor}>
+              <button disabled={!readyToMonitor && !serialOpen} onClick={toggleSerialMonitor}>
                 <RadioTower size={16} />
                 {serialOpen ? "Close" : "Monitor"}
               </button>
@@ -1105,6 +1141,66 @@ export default function App() {
                 </option>
               ))}
             </select>
+            <div className="serial-console">
+              <div className="serial-console-heading">
+                <strong>
+                  <MessageSquareText size={15} />
+                  Serial console
+                </strong>
+                <span>{serialOpen ? "open" : "closed"}</span>
+              </div>
+              <div className="serial-settings">
+                <label>
+                  <span>Baud</span>
+                  <input
+                    list="serial-baud-rates"
+                    inputMode="numeric"
+                    value={serialBaudRate}
+                    onChange={(event) => setSerialBaudRate(event.target.value)}
+                    disabled={serialOpen}
+                  />
+                </label>
+                <datalist id="serial-baud-rates">
+                  {commonBaudRates.map((rate) => (
+                    <option value={rate} key={rate} />
+                  ))}
+                </datalist>
+                <label>
+                  <span>Ending</span>
+                  <select value={serialLineEnding} onChange={(event) => setSerialLineEnding(event.target.value as SerialLineEnding)}>
+                    <option value="newline">Newline</option>
+                    <option value="both">Both NL + CR</option>
+                    <option value="carriage-return">Carriage return</option>
+                    <option value="none">No ending</option>
+                  </select>
+                </label>
+              </div>
+              <div className="serial-send-row">
+                <input
+                  aria-label="Serial message"
+                  value={serialInput}
+                  onChange={(event) => setSerialInput(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") void sendSerialMessage();
+                  }}
+                  placeholder="Send command"
+                  disabled={!serialOpen}
+                />
+                <button title="Send serial message" disabled={!serialOpen || !serialInput} onClick={() => void sendSerialMessage()}>
+                  <Send size={15} />
+                </button>
+                <button title="Clear serial transcript" onClick={() => setSerialTranscript([])}>
+                  <Eraser size={15} />
+                </button>
+              </div>
+              <div className="serial-transcript" aria-label="Serial transcript">
+                {serialTranscript.length === 0 ? (
+                  <span>No serial messages yet.</span>
+                ) : (
+                  serialTranscript.map((line, index) => <span key={`${line}-${index}`}>{line}</span>)
+                )}
+              </div>
+            </div>
             <div className="agent-log">
               {agentLog.map((line, index) => (
                 <span key={`${line}-${index}`}>{line}</span>

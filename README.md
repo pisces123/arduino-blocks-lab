@@ -15,6 +15,7 @@ Open-source Arduino block coding, inspired by the friendliness of LEGO SPIKE and
 - SPIKE-style friendliness, but for real Arduino hardware and open-source sensor packs.
 - Browser-based project building, with a local agent for real compile/upload instead of export-only sketches.
 - Beginner-safe upload preflight shows the agent, Arduino CLI, board target, USB port, libraries, and wiring state before compile/upload.
+- Built-in serial console supports baud selection, line endings, command sending, and a focused transcript for sensor debugging.
 - Arduino C++ as the trusted generated output, plus Python and JavaScript previews for learning.
 - A public roadmap for wiring validation, simulator exports, mission-map lessons, and community hardware packs.
 

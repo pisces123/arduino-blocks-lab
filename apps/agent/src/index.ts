@@ -32,6 +32,7 @@ type MonitorSession = {
   process: ChildProcessWithoutNullStreams;
   port: string;
   fqbn?: string;
+  baudRate?: number;
 };
 
 const app = express();
@@ -193,11 +194,13 @@ async function handleRpc(method: string, params: Record<string, unknown> = {}): 
     case "serial.open": {
       const port = z.string().parse(params.port);
       const fqbn = z.string().optional().parse(params.fqbn);
+      const baudRate = z.coerce.number().int().positive().optional().parse(params.baudRate);
       if (monitors.has(port)) return { port, alreadyOpen: true };
       const args = ["monitor", "-p", port];
       if (fqbn) args.push("--fqbn", fqbn);
+      if (baudRate) args.push("--config", `baudrate=${baudRate}`);
       const child = spawn(CLI, args, { stdio: "pipe" });
-      const session: MonitorSession = { process: child, port, fqbn };
+      const session: MonitorSession = { process: child, port, fqbn, baudRate };
       monitors.set(port, session);
       child.stdout.on("data", (chunk) => broadcast({ type: "serial.data", port, data: chunk.toString() }));
       child.stderr.on("data", (chunk) => broadcast({ type: "serial.error", port, data: chunk.toString() }));
