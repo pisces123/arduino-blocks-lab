@@ -22,6 +22,7 @@ Open-source Arduino block coding, inspired by the friendliness of LEGO SPIKE and
 - Hardware pack gallery plus URL install supports raw JSON URLs and common GitHub pack links so new sensors can be shared from public repos.
 - Visual wiring canvas turns board pins, power rails, buses, and components into readable wire rows with conflict/error states.
 - Board-aware pin assistant can fix duplicate, invalid, analog, and PWM pin choices while showing a live pin usage map.
+- Wiring repair assistant translates pin conflicts into exact student-friendly repair steps and safe one-click pin moves.
 - Beginner-safe upload preflight shows the agent, Arduino CLI, board target, USB port, libraries, and wiring state before compile/upload.
 - Connection Doctor turns common Arduino CLI, library, USB permission, and avrdude upload failures into a likely cause and next action.
 - Built-in serial console supports baud selection, line endings, command sending, and a focused transcript for sensor debugging.

@@ -2547,6 +2547,121 @@ html[data-theme="dark"] .breadboard-model {
   color: var(--green);
 }
 
+.repair-card {
+  display: grid;
+  gap: 9px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--soft-blue) 68%, var(--field)), var(--field)),
+    radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--piplup) 32%, transparent), transparent 34%);
+}
+
+.repair-card.fix {
+  border-color: color-mix(in srgb, var(--coral) 55%, var(--line));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--soft-coral) 48%, var(--field)), var(--field));
+}
+
+.repair-card.check {
+  border-color: color-mix(in srgb, var(--amber) 64%, var(--line));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--soft-amber) 50%, var(--field)), var(--field));
+}
+
+.repair-card.ready {
+  border-color: color-mix(in srgb, var(--green) 48%, var(--line));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--soft-green) 60%, var(--field)), var(--field));
+}
+
+.repair-card-heading {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.repair-badge {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--blue) 44%, var(--line));
+  border-radius: 8px;
+  background: var(--field);
+  color: var(--deep-blue);
+}
+
+.repair-card.fix .repair-badge {
+  border-color: color-mix(in srgb, var(--coral) 60%, var(--line));
+  color: var(--coral);
+}
+
+.repair-card.check .repair-badge {
+  border-color: color-mix(in srgb, var(--amber) 68%, var(--line));
+  color: var(--amber-line);
+}
+
+.repair-card.ready .repair-badge {
+  border-color: color-mix(in srgb, var(--green) 56%, var(--line));
+  color: var(--green);
+}
+
+.repair-title {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.repair-title strong {
+  color: var(--heading);
+  font-size: 13px;
+}
+
+.repair-action {
+  align-self: start;
+}
+
+.repair-items {
+  display: grid;
+  gap: 6px;
+}
+
+.repair-item {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 7px;
+  align-items: start;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.repair-item svg {
+  margin-top: 1px;
+  color: var(--deep-blue);
+}
+
+.repair-item.fix svg {
+  color: var(--coral);
+}
+
+.repair-item.check svg {
+  color: var(--amber-line);
+}
+
+.repair-item.ready svg {
+  color: var(--green);
+}
+
+.repair-item strong {
+  display: block;
+  color: var(--heading);
+  font-size: 12px;
+}
+
 .pin-map {
   max-height: 116px;
   display: flex;

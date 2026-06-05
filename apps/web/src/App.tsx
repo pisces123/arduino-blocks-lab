@@ -74,6 +74,7 @@ import { createLessonGuide, lessonActionLabel, lessonLevelLabel } from "./lesson
 import { collectDeviceWorkflow, type DeviceWorkflowAction, type DeviceWorkflowRunState, type DeviceWorkflowStepState } from "./deviceWorkflow";
 import { agentSetupDocsUrl, agentSetupPlatforms, createAgentSetupScript, getAgentSetupSteps, type AgentSetupPlatform } from "./agentSetup";
 import { collectConnectionDoctor, type ConnectionDoctorAction, type ConnectionDoctorSeverity } from "./connectionDoctor";
+import { collectWiringRepairPlan, type WiringRepairTone } from "./wiringRepair";
 
 type Mode = "blocks" | "code" | "circuit" | "lessons";
 type CodeView = "cpp" | "python" | "javascript";
@@ -455,6 +456,7 @@ export default function App() {
   const effectiveFqbn = targetLabel(project.boardId, selectedFqbn, activeCatalog);
   const externalLibraries = libraryNames(project, activeCatalog);
   const wiringDiagnostics = useMemo(() => collectWiringDiagnostics(project, selectedBoard, activeCatalog.components), [project, selectedBoard, activeCatalog.components]);
+  const wiringRepairPlan = useMemo(() => collectWiringRepairPlan(project, selectedBoard, activeCatalog.components), [project, selectedBoard, activeCatalog.components]);
   const boardPinUsage = useMemo(() => collectBoardPinUsage(project, selectedBoard, activeCatalog.components), [project, selectedBoard, activeCatalog.components]);
   const wiringCanvas = useMemo(() => createWiringCanvasModel(project, selectedBoard, activeCatalog.components), [project, selectedBoard, activeCatalog.components]);
   const circuitStudio = useMemo(
@@ -528,6 +530,15 @@ export default function App() {
   );
   const readyToMonitor = agentOnline && Boolean(cliStatus?.available) && Boolean(selectedPort.trim());
   const criticalWiringCount = wiringDiagnostics.filter((diagnostic) => diagnostic.severity !== "tip").length;
+  const wiringRepairTone: WiringRepairTone = wiringRepairPlan.autoFixAvailable
+    ? "fix"
+    : wiringRepairPlan.items.some((item) => item.tone === "fix")
+      ? "fix"
+      : wiringRepairPlan.items.some((item) => item.tone === "check")
+        ? "check"
+        : wiringRepairPlan.items.some((item) => item.tone === "ready")
+          ? "ready"
+          : "info";
   const wiringCanvasSummary =
     wiringCanvas.summary.total === 0
       ? "No wires"
@@ -976,6 +987,13 @@ export default function App() {
   function coachIcon(state: CoachStepState) {
     if (state === "done") return <CheckCircle2 size={15} />;
     if (state === "warning" || state === "blocked") return <AlertTriangle size={15} />;
+    return <Sparkles size={15} />;
+  }
+
+  function wiringRepairIcon(tone: WiringRepairTone) {
+    if (tone === "ready") return <CheckCircle2 size={15} />;
+    if (tone === "fix") return <AlertTriangle size={15} />;
+    if (tone === "check") return <Cable size={15} />;
     return <Sparkles size={15} />;
   }
 
@@ -1675,6 +1693,32 @@ export default function App() {
                   Auto pins
                 </button>
                 <span>{selectedBoard?.name}</span>
+              </div>
+            </div>
+            <div className={`repair-card ${wiringRepairTone}`}>
+              <div className="repair-card-heading">
+                <span className="repair-badge">{wiringRepairIcon(wiringRepairTone)}</span>
+                <span className="repair-title">
+                  <strong>{wiringRepairPlan.title}</strong>
+                  {wiringRepairPlan.detail}
+                </span>
+                {wiringRepairPlan.autoFixAvailable && (
+                  <button className="mini-action repair-action" onClick={applyAutoPins}>
+                    <Sparkles size={14} />
+                    Repair pins
+                  </button>
+                )}
+              </div>
+              <div className="repair-items">
+                {wiringRepairPlan.items.slice(0, 4).map((item) => (
+                  <div className={`repair-item ${item.tone}`} key={item.id}>
+                    {wiringRepairIcon(item.tone)}
+                    <span>
+                      <strong>{item.title}</strong>
+                      {item.detail}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
             <div className={`diagnostics-block ${criticalWiringCount > 0 ? "has-warnings" : ""}`}>
