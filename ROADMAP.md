@@ -20,8 +20,8 @@ Arduino Blocks Lab aims to become the easiest serious path from first circuit to
 
 ## Near-Term Priorities
 
-- Guided Mission Map: replace the plain lessons list with a SPIKE-like project path and progress.
-- Wiring Canvas: visual pin map with conflict warnings, board pin validation, and breadboard previews.
+- Guided Mission Map: expand the new saved-progress mission path into a richer project map.
+- Wiring Canvas: build on the new pin diagnostics with visual pin maps, conflict editing, and breadboard previews.
 - Sensor Pack Gallery: install block packs from URLs or GitHub repos.
 - Better Upload Bridge: signed agent installers, first-run diagnostics, and clearer browser-to-localhost setup.
 - Simulator Hooks: export Wokwi/Tinkercad-compatible project files where possible.

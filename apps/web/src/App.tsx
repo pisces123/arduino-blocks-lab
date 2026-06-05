@@ -10,16 +10,20 @@ import {
   Gauge,
   Globe2,
   Library,
+  Medal,
   Play,
   PlugZap,
   RadioTower,
+  RotateCcw,
   Save,
   Search,
   Send,
+  Sparkles,
   SquareStack,
   Terminal,
   Trash2,
-  Upload
+  Upload,
+  AlertTriangle
 } from "lucide-react";
 import type { ComponentDefinition, ComponentInstance, ProjectDocument, ProgramStep } from "@abl/block-schema";
 import { boards, catalog, components, createComponentInstance, lessons, starterProjects } from "@abl/catalog";
@@ -27,6 +31,7 @@ import { generateSketch } from "@abl/codegen";
 import BlocklyWorkspace from "./BlocklyWorkspace";
 import { agentHealth, agentRpc, openAgentEvents } from "./agentClient";
 import { projectToBlocklyXml } from "./projectXml";
+import { collectWiringDiagnostics } from "./wiringDiagnostics";
 
 type Mode = "blocks" | "code" | "lessons";
 type CodeView = "cpp" | "python" | "javascript";
@@ -47,6 +52,8 @@ type AgentCliStatus = {
   cli: string;
   error?: string;
 };
+
+const missionProgressKey = "abl.missionProgress.v1";
 
 function cloneProject(project: ProjectDocument): ProjectDocument {
   const cloned = JSON.parse(JSON.stringify(project)) as ProjectDocument;
@@ -144,6 +151,15 @@ function saveBlob(filename: string, contents: string, type: string) {
   URL.revokeObjectURL(link.href);
 }
 
+function loadMissionProgress(): Record<string, boolean> {
+  try {
+    const raw = window.localStorage.getItem(missionProgressKey);
+    return raw ? (JSON.parse(raw) as Record<string, boolean>) : {};
+  } catch {
+    return {};
+  }
+}
+
 function describeStep(step: ProgramStep): string {
   switch (step.kind) {
     case "digital-write":
@@ -239,6 +255,7 @@ export default function App() {
   const [boardTargets, setBoardTargets] = useState<BoardTarget[]>([]);
   const [serialOpen, setSerialOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<ComponentDefinition["category"]>("output");
+  const [missionProgress, setMissionProgress] = useState<Record<string, boolean>>(loadMissionProgress);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const generated = useMemo(() => generateSketch(project, catalog), [project]);
@@ -247,6 +264,10 @@ export default function App() {
   const selectedBoard = boards.find((board) => board.id === project.boardId) ?? boards[0];
   const effectiveFqbn = targetLabel(project.boardId, selectedFqbn);
   const externalLibraries = libraryNames(project);
+  const wiringDiagnostics = useMemo(() => collectWiringDiagnostics(project, selectedBoard), [project, selectedBoard]);
+  const criticalWiringCount = wiringDiagnostics.filter((diagnostic) => diagnostic.severity !== "tip").length;
+  const completedMissionCount = lessons.filter((lesson) => missionProgress[lesson.id]).length;
+  const nextMission = lessons.find((lesson) => !missionProgress[lesson.id]) ?? lessons[0];
 
   const updateFromBlocks = useCallback((program: ProgramStep[], blocksXml: string) => {
     setProject((current) => ({
@@ -285,10 +306,22 @@ export default function App() {
     return () => socket.close();
   }, [agentOnline]);
 
+  useEffect(() => {
+    window.localStorage.setItem(missionProgressKey, JSON.stringify(missionProgress));
+  }, [missionProgress]);
+
   function loadProject(nextProject: ProjectDocument) {
     setProject(cloneProject(nextProject));
     setReloadKey(crypto.randomUUID());
     setMode("blocks");
+  }
+
+  function completeMission(lessonId: string) {
+    setMissionProgress((current) => ({ ...current, [lessonId]: true }));
+  }
+
+  function resetMissionProgress() {
+    setMissionProgress({});
   }
 
   function addComponent(definition: ComponentDefinition) {
@@ -477,7 +510,11 @@ export default function App() {
         </span>
         <span className={agentOnline ? "online" : "offline"}>
           <Cable size={16} />
-          {agentOnline ? (cliStatus?.available ? "Agent + CLI ready" : "Agent online") : "Agent offline"}
+          {agentOnline ? (cliStatus ? (cliStatus.available ? "Agent + CLI ready" : "CLI not ready") : "Agent online") : "Agent offline"}
+        </span>
+        <span className={criticalWiringCount > 0 ? "warning" : "online"}>
+          {criticalWiringCount > 0 ? <AlertTriangle size={16} /> : <Sparkles size={16} />}
+          {criticalWiringCount > 0 ? `${criticalWiringCount} wiring note${criticalWiringCount === 1 ? "" : "s"}` : "Wiring clear"}
         </span>
         {generated.warnings.map((warning) => (
           <span className="warning" key={warning}>
@@ -578,17 +615,57 @@ export default function App() {
           )}
 
           {mode === "lessons" && (
-            <div className="lessons-panel">
-              {lessons.map((lesson) => (
-                <button className="lesson-row" key={lesson.id} onClick={() => loadProject({ ...lesson.starterProject, lessonId: lesson.id })}>
-                  <div>
-                    <span>{lesson.level}</span>
-                    <strong>{lesson.title}</strong>
-                    <p>{lesson.goal}</p>
-                  </div>
-                  <Play size={18} />
-                </button>
-              ))}
+            <div className="lessons-panel mission-panel">
+              <div className="mission-hero">
+                <div>
+                  <span>Mission path</span>
+                  <strong>
+                    {completedMissionCount}/{lessons.length} complete
+                  </strong>
+                </div>
+                <div className="mission-progress" aria-label="Mission progress">
+                  <span style={{ width: `${(completedMissionCount / Math.max(lessons.length, 1)) * 100}%` }} />
+                </div>
+                <div className="mission-actions">
+                  <button onClick={() => nextMission && loadProject({ ...nextMission.starterProject, lessonId: nextMission.id })}>
+                    <Play size={16} />
+                    Next
+                  </button>
+                  <button onClick={resetMissionProgress}>
+                    <RotateCcw size={16} />
+                    Reset
+                  </button>
+                </div>
+              </div>
+
+              <div className="mission-track">
+                {lessons.map((lesson, index) => {
+                  const complete = Boolean(missionProgress[lesson.id]);
+                  const active = project.lessonId === lesson.id;
+                  return (
+                    <div className={`mission-card ${complete ? "complete" : ""} ${active ? "active" : ""}`} key={lesson.id}>
+                      <div className="mission-node">
+                        {complete ? <Medal size={20} /> : <span>{index + 1}</span>}
+                      </div>
+                      <div className="mission-copy">
+                        <span>{lesson.level}</span>
+                        <strong>{lesson.title}</strong>
+                        <p>{lesson.goal}</p>
+                      </div>
+                      <div className="mission-card-actions">
+                        <button onClick={() => loadProject({ ...lesson.starterProject, lessonId: lesson.id })}>
+                          <Play size={16} />
+                          Launch
+                        </button>
+                        <button disabled={complete} onClick={() => completeMission(lesson.id)}>
+                          <CheckCircle2 size={16} />
+                          {complete ? "Done" : "Mark"}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </section>
@@ -598,6 +675,28 @@ export default function App() {
             <div className="section-heading">
               <h2>Wiring</h2>
               <span>{selectedBoard?.name}</span>
+            </div>
+            <div className={`diagnostics-block ${criticalWiringCount > 0 ? "has-warnings" : ""}`}>
+              <div className="diagnostics-heading">
+                <strong>Checks</strong>
+                <span>{criticalWiringCount > 0 ? `${criticalWiringCount} note${criticalWiringCount === 1 ? "" : "s"}` : "ready"}</span>
+              </div>
+              {wiringDiagnostics.length === 0 ? (
+                <div className="diagnostic-row ok">
+                  <Sparkles size={16} />
+                  <span>Pin map ready.</span>
+                </div>
+              ) : (
+                wiringDiagnostics.slice(0, 5).map((diagnostic) => (
+                  <div className={`diagnostic-row ${diagnostic.severity}`} key={`${diagnostic.title}-${diagnostic.message}`}>
+                    {diagnostic.severity === "tip" ? <Sparkles size={16} /> : <AlertTriangle size={16} />}
+                    <span>
+                      <strong>{diagnostic.title}</strong>
+                      {diagnostic.message}
+                    </span>
+                  </div>
+                ))
+              )}
             </div>
             {project.components.map((instance) => {
               const definition = componentDefinition(instance);

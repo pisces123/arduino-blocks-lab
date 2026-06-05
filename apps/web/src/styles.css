@@ -367,6 +367,138 @@ button:disabled {
   padding: 16px;
 }
 
+.mission-panel {
+  align-content: stretch;
+  grid-template-rows: auto 1fr;
+}
+
+.mission-hero {
+  display: grid;
+  grid-template-columns: minmax(160px, auto) 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ffffff, var(--soft-blue));
+}
+
+.mission-hero span,
+.mission-copy span {
+  color: var(--deep-blue);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.mission-hero strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 20px;
+}
+
+.mission-progress {
+  height: 14px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+}
+
+.mission-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--amber), var(--green), var(--blue));
+}
+
+.mission-actions,
+.mission-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mission-actions button,
+.mission-card-actions button {
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 8px;
+  padding: 0 10px;
+  font-weight: 650;
+}
+
+.mission-track {
+  min-height: 0;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  overflow: auto;
+}
+
+.mission-card {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 94px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  border-left: 7px solid var(--piplup);
+}
+
+.mission-card.active {
+  border-color: var(--deep-blue);
+  box-shadow: 0 0 0 3px rgba(20, 168, 224, 0.16);
+}
+
+.mission-card.complete {
+  border-left-color: var(--green);
+  background: linear-gradient(90deg, var(--soft-green), #fff 38%);
+}
+
+.mission-node {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--soft-blue);
+  color: var(--deep-blue);
+  font-weight: 800;
+}
+
+.mission-card.complete .mission-node {
+  background: var(--green);
+  color: white;
+}
+
+.mission-copy {
+  min-width: 0;
+}
+
+.mission-copy strong,
+.mission-copy p {
+  display: block;
+  margin: 0;
+}
+
+.mission-copy strong {
+  margin-top: 2px;
+  font-size: 17px;
+}
+
+.mission-copy p {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .lesson-row {
   min-height: 82px;
   display: grid;
@@ -419,6 +551,65 @@ button:disabled {
   border-radius: 8px;
   background: #fff;
   border-left: 5px solid var(--green);
+}
+
+.diagnostics-block {
+  display: grid;
+  gap: 7px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--soft-green);
+}
+
+.diagnostics-block.has-warnings {
+  background: #fff7dc;
+  border-color: #e5bd39;
+}
+
+.diagnostics-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.diagnostics-heading strong {
+  color: #073d66;
+  font-size: 13px;
+}
+
+.diagnostics-heading span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.diagnostic-row {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 7px;
+  align-items: start;
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.diagnostic-row svg {
+  margin-top: 1px;
+}
+
+.diagnostic-row strong {
+  display: block;
+  font-size: 12px;
+}
+
+.diagnostic-row.error svg,
+.diagnostic-row.warning svg {
+  color: var(--coral);
+}
+
+.diagnostic-row.tip svg,
+.diagnostic-row.ok svg {
+  color: var(--green);
 }
 
 .wiring-block strong {
