@@ -3,6 +3,7 @@ import { AlertTriangle, CheckCircle2, Clock3, Cpu, Globe2, RadioTower, Sparkles,
 import {
   defaultBenchControlValues,
   simulateBenchReadings,
+  type CircuitStudioBreadboardTone,
   type CircuitStudioBenchControl,
   type CircuitStudioBenchControlValue,
   type CircuitStudioBenchReading,
@@ -43,6 +44,12 @@ function simulatorIcon(tone: CircuitStudioSimulatorTone) {
   if (tone === "ready") return <CheckCircle2 size={15} />;
   if (tone === "blocked") return <AlertTriangle size={15} />;
   return <Globe2 size={15} />;
+}
+
+function breadboardIcon(tone: CircuitStudioBreadboardTone) {
+  if (tone === "ready") return <CheckCircle2 size={15} />;
+  if (tone === "blocked") return <AlertTriangle size={15} />;
+  return <Cpu size={15} />;
 }
 
 function wirePath(wire: CircuitStudioModel["wires"][number]) {
@@ -277,6 +284,54 @@ export default function CircuitStudioPanel({ model, onExportWokwiProject }: Prop
                 </div>
               ))}
             </div>
+          </section>
+
+          <section className={`circuit-card breadboard-card ${model.breadboardPlan.tone}`}>
+            <div className="circuit-card-heading">
+              <strong>Breadboard Preflight</strong>
+              <span>
+                {model.breadboardPlan.signalWires + model.breadboardPlan.busWires} signal · {model.breadboardPlan.groundWires} ground
+              </span>
+            </div>
+            <div className="breadboard-summary">
+              <span>{breadboardIcon(model.breadboardPlan.tone)}</span>
+              <div>
+                <strong>{model.breadboardPlan.title}</strong>
+                <p>{model.breadboardPlan.detail}</p>
+              </div>
+            </div>
+            <div className="breadboard-stats">
+              <span>
+                <strong>{model.breadboardPlan.powerWires}</strong>
+                power
+              </span>
+              <span>
+                <strong>{model.breadboardPlan.signalWires}</strong>
+                signal
+              </span>
+              <span>
+                <strong>{model.breadboardPlan.busWires}</strong>
+                bus
+              </span>
+            </div>
+            <div className="breadboard-item-list">
+              {model.breadboardPlan.items.slice(0, 5).map((item) => (
+                <div className={`breadboard-item ${item.tone}`} key={item.id}>
+                  {breadboardIcon(item.tone)}
+                  <span>
+                    <strong>{item.title}</strong>
+                    {item.detail}
+                  </span>
+                </div>
+              ))}
+            </div>
+            {model.breadboardPlan.simulatorHints.length > 0 && (
+              <div className="breadboard-hints" aria-label="Simulator hints">
+                {model.breadboardPlan.simulatorHints.map((hint) => (
+                  <span key={hint}>{hint}</span>
+                ))}
+              </div>
+            )}
           </section>
 
           <section className="circuit-card">

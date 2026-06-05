@@ -30,6 +30,16 @@ describe("circuit studio model", () => {
     expect(model.benchTests[0]?.simulation.kind).toBe("digital-output");
     expect(model.benchTests[0]?.readings[0]?.value).toBe("ON / HIGH");
     expect(model.steps.find((step) => step.id === "behavior")?.state).toBe("done");
+    expect(model.breadboardPlan).toMatchObject({
+      tone: "ready",
+      title: "Ready to breadboard",
+      powerWires: 0,
+      groundWires: 1,
+      signalWires: 1,
+      busWires: 0
+    });
+    expect(model.breadboardPlan.simulatorHints).toContain("Use Wokwi LED or a real 5mm LED with a resistor.");
+    expect(model.breadboardPlan.items.some((item) => item.id === "signal-route")).toBe(true);
   });
 
   it("tracks power, signal, and display behavior for a multi-part project", () => {
@@ -41,6 +51,13 @@ describe("circuit studio model", () => {
     expect(model.events.some((event) => event.tone === "display")).toBe(true);
     expect(model.benchTests.some((test) => test.title === "Change room weather")).toBe(true);
     expect(model.benchTests.some((test) => test.title === "Read the display")).toBe(true);
+    expect(model.breadboardPlan).toMatchObject({
+      powerWires: 2,
+      groundWires: 2,
+      signalWires: 1,
+      busWires: 2
+    });
+    expect(model.breadboardPlan.items.some((item) => item.id === "bus-route" && item.detail.includes("SDA A4, SCL A5"))).toBe(true);
   });
 
   it("simulates ultrasonic distance as echo timing and serial output", () => {
@@ -126,6 +143,14 @@ describe("circuit studio model", () => {
     expect(model.simulatorPlan.title).toBe("Fix before simulating");
     expect(model.simulatorPlan.items[0]).toMatchObject({
       id: "fix-wiring",
+      tone: "blocked"
+    });
+    expect(model.breadboardPlan).toMatchObject({
+      tone: "blocked",
+      title: "Fix before breadboard"
+    });
+    expect(model.breadboardPlan.items[0]).toMatchObject({
+      id: "repair-errors",
       tone: "blocked"
     });
   });

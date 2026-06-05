@@ -140,6 +140,27 @@ export type CircuitStudioSimulatorPlan = {
   items: CircuitStudioSimulatorItem[];
 };
 
+export type CircuitStudioBreadboardTone = "ready" | "warning" | "blocked";
+
+export type CircuitStudioBreadboardItem = {
+  id: string;
+  tone: CircuitStudioBreadboardTone;
+  title: string;
+  detail: string;
+};
+
+export type CircuitStudioBreadboardPlan = {
+  tone: CircuitStudioBreadboardTone;
+  title: string;
+  detail: string;
+  powerWires: number;
+  groundWires: number;
+  signalWires: number;
+  busWires: number;
+  simulatorHints: string[];
+  items: CircuitStudioBreadboardItem[];
+};
+
 export type CircuitStudioModel = {
   boardName: string;
   projectName: string;
@@ -149,6 +170,7 @@ export type CircuitStudioModel = {
   events: CircuitStudioEvent[];
   benchTests: CircuitStudioBenchTest[];
   simulatorPlan: CircuitStudioSimulatorPlan;
+  breadboardPlan: CircuitStudioBreadboardPlan;
   stats: {
     components: number;
     wires: number;
@@ -1024,6 +1046,119 @@ function createSimulatorPlan(input: CircuitStudioInput, benchTests: CircuitStudi
   };
 }
 
+function connectionPinList(connections: WiringCanvasConnection[]) {
+  const labels = Array.from(new Set(connections.map((connection) => connection.boardPinLabel))).slice(0, 5);
+  return labels.length > 0 ? labels.join(", ") : "no pins";
+}
+
+function isGroundConnection(connection: WiringCanvasConnection) {
+  return connection.boardPinId.toUpperCase().includes("GND") || connection.boardPinLabel.toUpperCase().includes("GND");
+}
+
+function createBreadboardPlan(input: CircuitStudioInput): CircuitStudioBreadboardPlan {
+  const errors = input.wiringDiagnostics.filter((diagnostic) => diagnostic.severity === "error");
+  const warnings = input.wiringDiagnostics.filter((diagnostic) => diagnostic.severity === "warning");
+  const connections = input.wiringCanvas.connections;
+  const powerConnections = connections.filter((connection) => connection.boardPinKind === "power" && !isGroundConnection(connection));
+  const groundConnections = connections.filter((connection) => connection.boardPinKind === "power" && isGroundConnection(connection));
+  const signalConnections = connections.filter((connection) => ["digital", "analog"].includes(connection.boardPinKind));
+  const busConnections = connections.filter((connection) => connection.boardPinKind === "bus");
+  const definitionsById = componentDefinitionMap(input.definitions);
+  const simulatorHints = Array.from(
+    new Set(input.project.components.flatMap((component) => definitionsById.get(component.componentId)?.simulatorHints ?? []))
+  ).slice(0, 4);
+  const items: CircuitStudioBreadboardItem[] = [];
+
+  if (input.project.components.length === 0) {
+    items.push({
+      id: "add-hardware",
+      tone: "warning",
+      title: "Pick parts first",
+      detail: "Add a starter project or hardware part so the breadboard plan can map real pins."
+    });
+  }
+
+  if (errors.length > 0) {
+    items.push({
+      id: "repair-errors",
+      tone: "blocked",
+      title: "Repair pin errors",
+      detail: `${errors.length} wiring error${errors.length === 1 ? "" : "s"} must be fixed before the physical circuit will match the sketch.`
+    });
+  }
+
+  if (powerConnections.length > 0 || groundConnections.length > 0) {
+    items.push({
+      id: "rails-first",
+      tone: errors.length > 0 ? "blocked" : "ready",
+      title: "Build rails first",
+      detail: `${powerConnections.length} power wire${powerConnections.length === 1 ? "" : "s"} and ${groundConnections.length} ground wire${groundConnections.length === 1 ? "" : "s"} should be placed before signal wires.`
+    });
+  } else if (input.project.components.length > 0) {
+    items.push({
+      id: "no-rails",
+      tone: "ready",
+      title: "No power rail needed",
+      detail: "This circuit only needs signal or ground-style connections, so keep the layout simple."
+    });
+  }
+
+  if (signalConnections.length > 0) {
+    items.push({
+      id: "signal-route",
+      tone: warnings.length > 0 ? "warning" : errors.length > 0 ? "blocked" : "ready",
+      title: "Route signal wires",
+      detail: `${signalConnections.length} signal wire${signalConnections.length === 1 ? "" : "s"} land on ${connectionPinList(signalConnections)}.`
+    });
+  }
+
+  if (busConnections.length > 0) {
+    items.push({
+      id: "bus-route",
+      tone: warnings.length > 0 ? "warning" : errors.length > 0 ? "blocked" : "ready",
+      title: "Keep bus pairs together",
+      detail: `${connectionPinList(busConnections)} should stay paired and short for I2C or bus modules.`
+    });
+  }
+
+  if (warnings.length > 0) {
+    items.push({
+      id: "review-warnings",
+      tone: "warning",
+      title: "Review warning notes",
+      detail: `${warnings.length} warning${warnings.length === 1 ? "" : "s"} may still work, but students should resolve or understand them before upload.`
+    });
+  }
+
+  if (simulatorHints.length > 0) {
+    items.push({
+      id: "simulator-stand-ins",
+      tone: errors.length > 0 ? "blocked" : "ready",
+      title: "Use simulator stand-ins",
+      detail: simulatorHints[0] ?? "Use the component hints from this pack when building the virtual circuit."
+    });
+  }
+
+  const tone: CircuitStudioBreadboardTone = errors.length > 0 ? "blocked" : warnings.length > 0 || input.project.components.length === 0 ? "warning" : "ready";
+
+  return {
+    tone,
+    title: tone === "ready" ? "Ready to breadboard" : tone === "blocked" ? "Fix before breadboard" : "Review before breadboard",
+    detail:
+      tone === "ready"
+        ? "Wire rails first, add signal leads, then run the bench test before upload."
+        : tone === "blocked"
+          ? "The physical build would not match the board pin map yet."
+          : "A teacher or student should review the notes before trusting the circuit.",
+    powerWires: powerConnections.length,
+    groundWires: groundConnections.length,
+    signalWires: signalConnections.length,
+    busWires: busConnections.length,
+    simulatorHints,
+    items
+  };
+}
+
 export function createCircuitStudioModel(input: CircuitStudioInput): CircuitStudioModel {
   const placements = createPlacements(input.project, input.definitions);
   const wires = createWires(input.wiringCanvas.connections, placements);
@@ -1042,6 +1177,7 @@ export function createCircuitStudioModel(input: CircuitStudioInput): CircuitStud
     events: createEvents(input.project, input.wiringCanvas.connections),
     benchTests,
     simulatorPlan: createSimulatorPlan(input, benchTests),
+    breadboardPlan: createBreadboardPlan(input),
     stats: {
       components: input.project.components.length,
       wires: input.wiringCanvas.connections.length,
