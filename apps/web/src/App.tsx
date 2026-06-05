@@ -44,6 +44,7 @@ import { collectWiringDiagnostics } from "./wiringDiagnostics";
 import { createWokwiDiagram, unsupportedWokwiComponents } from "./wokwiExport";
 import { importedPackFromManifest, parseStoredExtensionPacks, serializeExtensionPacks, type ImportedExtensionPack } from "./extensionPacks";
 import { parseStoredProject, serializeProject } from "./projectStorage";
+import { collectUploadReadiness, type AgentCliStatus, type UploadChecklistState } from "./uploadReadiness";
 
 type Mode = "blocks" | "code" | "lessons";
 type CodeView = "cpp" | "python" | "javascript";
@@ -64,12 +65,6 @@ type DetectedPort = {
 type BoardTarget = {
   fqbn: string;
   name: string;
-};
-
-type AgentCliStatus = {
-  available: boolean;
-  cli: string;
-  error?: string;
 };
 
 const missionProgressKey = "abl.missionProgress.v1";
@@ -352,6 +347,18 @@ export default function App() {
   const effectiveFqbn = targetLabel(project.boardId, selectedFqbn, activeCatalog);
   const externalLibraries = libraryNames(project, activeCatalog);
   const wiringDiagnostics = useMemo(() => collectWiringDiagnostics(project, selectedBoard, activeCatalog.components), [project, selectedBoard, activeCatalog.components]);
+  const uploadReadiness = useMemo(
+    () =>
+      collectUploadReadiness({
+        agentOnline,
+        cliStatus,
+        fqbn: effectiveFqbn,
+        selectedPort,
+        libraries: externalLibraries,
+        wiringDiagnostics
+      }),
+    [agentOnline, cliStatus, effectiveFqbn, externalLibraries, selectedPort, wiringDiagnostics]
+  );
   const criticalWiringCount = wiringDiagnostics.filter((diagnostic) => diagnostic.severity !== "tip").length;
   const completedMissionCount = activeCatalog.lessons.filter((lesson) => missionProgress[lesson.id]).length;
   const nextMission = activeCatalog.lessons.find((lesson) => !missionProgress[lesson.id]) ?? activeCatalog.lessons[0];
@@ -535,6 +542,12 @@ export default function App() {
       response.ok ? `${serialOpen ? "Closed" : "Opened"} serial monitor on ${selectedPort}.` : `Serial monitor failed: ${response.error}`,
       ...current
     ]);
+  }
+
+  function readinessIcon(state: UploadChecklistState) {
+    if (state === "ready") return <CheckCircle2 size={15} />;
+    if (state === "warning" || state === "blocked") return <AlertTriangle size={15} />;
+    return <Sparkles size={15} />;
   }
 
   function exportProject() {
@@ -1016,6 +1029,23 @@ export default function App() {
               <h2>Board</h2>
               <span>{agentOnline ? "ready" : "local"}</span>
             </div>
+            <div className={`upload-readiness ${uploadReadiness.readyToUpload ? "ready" : uploadReadiness.readyToCompile ? "compile" : "blocked"}`}>
+              <div className="readiness-summary">
+                <strong>{uploadReadiness.title}</strong>
+                <span>{uploadReadiness.detail}</span>
+              </div>
+              <div className="readiness-list">
+                {uploadReadiness.items.map((item) => (
+                  <div className={`readiness-item ${item.state}`} key={item.id}>
+                    {readinessIcon(item.state)}
+                    <span>
+                      <strong>{item.label}</strong>
+                      {item.detail}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
             <label className="fqbn-field">
               <span>Upload target FQBN</span>
               <input value={selectedFqbn} onChange={(event) => setSelectedFqbn(event.target.value)} placeholder="arduino:avr:uno" />
@@ -1045,11 +1075,11 @@ export default function App() {
                 <Library size={16} />
                 Libraries
               </button>
-              <button onClick={compileSketch}>
+              <button disabled={!uploadReadiness.readyToCompile} onClick={compileSketch}>
                 <Terminal size={16} />
                 Compile
               </button>
-              <button disabled={!selectedPort} onClick={uploadSketch}>
+              <button disabled={!uploadReadiness.readyToUpload} onClick={uploadSketch}>
                 <Send size={16} />
                 Upload
               </button>

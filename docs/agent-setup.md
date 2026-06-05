@@ -47,6 +47,8 @@ When you compile or upload, the agent prepares the matching core and project lib
 
 For third-party boards, install or configure their Arduino CLI package index first, then paste the board FQBN into the app.
 
+The Board panel in the web app shows an upload readiness checklist before compile/upload. It checks the local agent, Arduino CLI, FQBN target, USB port, required libraries, and wiring diagnostics so beginners can fix setup issues before seeing raw compiler output.
+
 ## Troubleshooting
 
 - If the app says the agent is offline, run `npm run dev:agent`.

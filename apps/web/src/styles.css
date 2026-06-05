@@ -818,6 +818,79 @@ button:disabled {
   min-width: 0;
 }
 
+.upload-readiness {
+  display: grid;
+  gap: 9px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--coral);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.upload-readiness.compile {
+  border-left-color: var(--amber);
+  background: #fffaf0;
+}
+
+.upload-readiness.ready {
+  border-left-color: var(--green);
+  background: var(--soft-green);
+}
+
+.readiness-summary {
+  display: grid;
+  gap: 3px;
+}
+
+.readiness-summary strong {
+  color: #073d66;
+  font-size: 14px;
+}
+
+.readiness-summary span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.readiness-list {
+  display: grid;
+  gap: 6px;
+}
+
+.readiness-item {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 7px;
+  align-items: start;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.readiness-item svg {
+  margin-top: 1px;
+}
+
+.readiness-item strong {
+  display: block;
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.readiness-item.ready svg {
+  color: var(--green);
+}
+
+.readiness-item.info svg {
+  color: var(--deep-blue);
+}
+
+.readiness-item.warning svg,
+.readiness-item.blocked svg {
+  color: var(--coral);
+}
+
 .fqbn-field {
   display: grid;
   gap: 6px;
