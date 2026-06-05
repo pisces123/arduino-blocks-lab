@@ -66,5 +66,32 @@ describe("extension manifests", () => {
     expect(parsed.errors).toEqual([]);
     expect(parsed.manifest?.components?.[0]?.id).toBe("soil-moisture");
     expect(parsed.manifest?.lessons?.[0]?.starterProject.name).toBe("Soil Monitor");
+    expect(parsed.manifest?.lessons?.[0]?.steps?.[0]?.action).toBe("wire");
+    expect(parsed.manifest?.lessons?.[0]?.success?.[0]).toContain("Serial values");
+  });
+
+  it("rejects invalid guided lesson steps", () => {
+    const parsed = parseExtensionManifest({
+      ...soilPack,
+      lessons: [
+        {
+          id: "lesson-bad",
+          title: "Bad Lesson",
+          level: "word",
+          goal: "Break parsing.",
+          steps: [{ title: "Do it", detail: "Invalid action.", action: "dance" }],
+          starterProject: {
+            schemaVersion: "1.0.0",
+            name: "Bad",
+            boardId: "arduino-uno",
+            components: [],
+            program: []
+          }
+        }
+      ]
+    });
+
+    expect(parsed.manifest).toBeUndefined();
+    expect(parsed.errors).toEqual(["lessons[0] is missing required lesson or starter project fields."]);
   });
 });

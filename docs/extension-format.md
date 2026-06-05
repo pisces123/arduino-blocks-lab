@@ -58,6 +58,41 @@ GitHub `blob` links are converted to raw content URLs before fetching. Third-par
 
 V1 imported packs can reuse the built-in block operations such as analog serial, digital serial, relay write, tone, and display print. Fully custom Blockly block rendering is still a future extension-pack milestone.
 
+## Guided Lessons
+
+Lessons can be simple starter projects, or they can include a classroom guide. The guide fields are optional; if they are absent, the app derives materials, wiring count, block count, and a basic four-step guide from the starter project.
+
+```json
+{
+  "id": "vendor.distance-lesson",
+  "title": "Distance Alert",
+  "level": "word",
+  "goal": "Measure distance and react when an object is close.",
+  "minutes": 30,
+  "concepts": ["sensor timing", "serial monitor"],
+  "materials": ["Arduino Uno", "HC-SR04 ultrasonic sensor", "jumper wires"],
+  "steps": [
+    {
+      "title": "Wire the sensor",
+      "detail": "Connect trigger, echo, VCC, and GND to the pins in the starter project.",
+      "action": "wire",
+      "checklist": ["Trig pin matches", "Echo pin matches", "Ground is connected"]
+    },
+    {
+      "title": "Test readings",
+      "detail": "Upload, open the serial monitor, and move an object closer to the sensor.",
+      "action": "test",
+      "checklist": ["Serial monitor opens", "Numbers change with distance"]
+    }
+  ],
+  "success": ["Distance values change when an object moves."],
+  "teacherNotes": ["Use a flat object for more stable first readings."],
+  "starterProject": { "schemaVersion": "1.0.0", "name": "Distance Alert", "boardId": "arduino-uno", "components": [], "program": [] }
+}
+```
+
+Step `action` may be `build`, `wire`, `code`, `test`, `upload`, or `reflect`.
+
 See `examples/extensions/soil-moisture-pack.json` for a minimal community sensor pack.
 
 The authoritative JSON Schema lives in `docs/extension.schema.json`.

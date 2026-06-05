@@ -6,6 +6,7 @@ import type {
   ComponentInstance,
   ExtensionManifest,
   LessonDefinition,
+  LessonStep,
   LibraryDependency,
   PinMap,
   ProjectDocument
@@ -471,6 +472,31 @@ export const lessons: LessonDefinition[] = [
     title: "First Blink",
     level: "icon",
     goal: "Make the built-in LED blink once per second.",
+    minutes: 15,
+    concepts: ["digital output", "loop timing", "upload"],
+    materials: ["Arduino Uno, Nano, or Mega", "USB cable"],
+    steps: [
+      {
+        title: "Pick the board",
+        detail: "Use the built-in LED project so no breadboard wiring is needed yet.",
+        action: "build",
+        checklist: ["Arduino Uno is selected", "Built-in LED block is visible"]
+      },
+      {
+        title: "Read the blocks",
+        detail: "The program turns the LED on, waits, turns it off, then waits again.",
+        action: "code",
+        checklist: ["The wait blocks use 1000 ms", "The Arduino C++ preview changes with the blocks"]
+      },
+      {
+        title: "Upload and observe",
+        detail: "Run the local agent, connect USB, compile, upload, and watch the board LED blink.",
+        action: "upload",
+        checklist: ["Agent and CLI are ready", "Upload finishes", "The LED blinks once per second"]
+      }
+    ],
+    success: ["The built-in LED turns on and off repeatedly.", "A student can point to the matching Arduino C++ lines."],
+    teacherNotes: ["This is the safest first upload because it needs no external wiring."],
     starterProject: starterProjects.blink
   },
   {
@@ -478,6 +504,31 @@ export const lessons: LessonDefinition[] = [
     title: "Button Switch",
     level: "word",
     goal: "Use a button input to control an LED output.",
+    minutes: 25,
+    concepts: ["digital input", "pull-down wiring", "conditional behavior"],
+    materials: ["Arduino board", "LED", "pushbutton", "resistor", "breadboard", "jumper wires"],
+    steps: [
+      {
+        title: "Build the circuit",
+        detail: "Wire the button to the input pin and the LED to the output pin shown in the project.",
+        action: "wire",
+        checklist: ["Button signal pin matches the project", "LED signal pin matches the project", "Ground rail is connected"]
+      },
+      {
+        title: "Check the decision",
+        detail: "The generated program reads the button and writes the LED state.",
+        action: "code",
+        checklist: ["The button controls LED block is present", "Wiring checks are clear"]
+      },
+      {
+        title: "Test the switch",
+        detail: "Upload, press the button, and confirm the LED only lights when the input is active.",
+        action: "test",
+        checklist: ["Upload finishes", "Pressing the button changes the LED", "Releasing the button turns it back off"]
+      }
+    ],
+    success: ["The LED responds to the physical button.", "Students can explain input versus output."],
+    teacherNotes: ["If the LED is always on, check button orientation and ground wiring first."],
     starterProject: starterProjects.buttonLed
   },
   {
@@ -485,6 +536,31 @@ export const lessons: LessonDefinition[] = [
     title: "Servo Knob",
     level: "word",
     goal: "Turn a knob and move a servo through the matching angle.",
+    minutes: 30,
+    concepts: ["analog input", "mapping values", "servo control"],
+    materials: ["Arduino board", "potentiometer", "servo motor", "breadboard", "jumper wires"],
+    steps: [
+      {
+        title: "Wire the knob and servo",
+        detail: "Connect the potentiometer signal to an analog pin and the servo signal to a PWM-capable pin.",
+        action: "wire",
+        checklist: ["Potentiometer uses an analog pin", "Servo signal uses the selected pin", "Power and ground are shared"]
+      },
+      {
+        title: "Follow the mapping",
+        detail: "The block maps the knob reading into a servo angle so motion follows the input.",
+        action: "code",
+        checklist: ["Potentiometer controls servo block is present", "Arduino C++ includes Servo.h"]
+      },
+      {
+        title: "Move it slowly",
+        detail: "Upload and turn the knob from one end to the other while watching the servo sweep.",
+        action: "test",
+        checklist: ["Servo moves without buzzing hard", "Knob direction changes the angle", "USB stays connected"]
+      }
+    ],
+    success: ["The servo follows the potentiometer.", "Students can describe how analog readings become motion."],
+    teacherNotes: ["Small USB ports can struggle with larger servos; use a small hobby servo for first tests."],
     starterProject: starterProjects.servoKnob
   },
   {
@@ -492,6 +568,31 @@ export const lessons: LessonDefinition[] = [
     title: "Distance Meter",
     level: "word",
     goal: "Print ultrasonic distance readings to the serial monitor.",
+    minutes: 30,
+    concepts: ["sensor timing", "serial monitor", "measurement"],
+    materials: ["Arduino board", "HC-SR04 ultrasonic sensor", "breadboard", "jumper wires"],
+    steps: [
+      {
+        title: "Aim the sensor",
+        detail: "Wire trigger, echo, power, and ground, then face the sensor toward an open space.",
+        action: "wire",
+        checklist: ["Trig pin matches the project", "Echo pin matches the project", "VCC and GND are connected"]
+      },
+      {
+        title: "Read the measurement",
+        detail: "The program sends a short pulse, times the echo, and prints centimeters over serial.",
+        action: "code",
+        checklist: ["Distance serial block is present", "Serial.begin appears in Arduino C++"]
+      },
+      {
+        title: "Use the serial monitor",
+        detail: "Upload, open Monitor, and move your hand closer and farther from the sensor.",
+        action: "test",
+        checklist: ["Serial monitor opens at 9600 baud", "Numbers change as distance changes", "Readings are stable enough to compare"]
+      }
+    ],
+    success: ["The serial console streams changing distance values.", "Students can connect the wiring pins to the printed reading."],
+    teacherNotes: ["Soft fabric and angled objects can give noisy ultrasonic readings; use a notebook or box for first tests."],
     starterProject: starterProjects.ultrasonicDistance
   },
   {
@@ -499,6 +600,31 @@ export const lessons: LessonDefinition[] = [
     title: "Weather Readout",
     level: "text",
     goal: "Read a DHT sensor and show status text on an LCD.",
+    minutes: 40,
+    concepts: ["libraries", "I2C display", "sensor readout", "generated C++"],
+    materials: ["Arduino board", "DHT11 or DHT22 sensor", "LCD 1602 I2C display", "breadboard", "jumper wires"],
+    steps: [
+      {
+        title: "Wire sensor and display",
+        detail: "Connect the DHT signal pin and the LCD I2C SDA/SCL pins for the selected board.",
+        action: "wire",
+        checklist: ["DHT signal pin matches the project", "LCD SDA and SCL match the board", "Power and ground are shared"]
+      },
+      {
+        title: "Install libraries",
+        detail: "Use the Board panel Libraries button before compiling so DHT and LCD code can build.",
+        action: "upload",
+        checklist: ["DHT sensor library is installed", "LiquidCrystal I2C library is installed", "Compile finishes"]
+      },
+      {
+        title: "Compare outputs",
+        detail: "Open the serial monitor and look at the LCD to compare text output in two places.",
+        action: "test",
+        checklist: ["Serial prints humidity and temperature", "LCD shows the project message", "Generated sketch includes the libraries"]
+      }
+    ],
+    success: ["The sketch compiles with required libraries.", "The LCD and serial monitor both show useful output."],
+    teacherNotes: ["I2C LCD backpacks may use a different address; if the screen is blank, scan or adjust the address later."],
     starterProject: starterProjects.dhtDisplay
   }
 ];
@@ -536,6 +662,7 @@ const componentCategories: Array<ComponentDefinition["category"]> = [
 ];
 const blockCategories: Array<BlockDefinition["category"]> = ["logic", "input", "output", "display", "timing", "serial", "motion", "communication"];
 const blockKinds = new Set(blocks.map((block) => block.kind));
+const lessonStepActions: Array<NonNullable<LessonStep["action"]>> = ["build", "wire", "code", "test", "upload", "reflect"];
 
 function record(value: unknown): Record<string, unknown> | undefined {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : undefined;
@@ -714,15 +841,50 @@ function parseBlock(value: unknown, errors: string[], path: string): BlockDefini
   };
 }
 
+function lessonSteps(value: unknown): LessonStep[] | undefined {
+  if (value === undefined) return [];
+  if (!Array.isArray(value)) return undefined;
+  const parsed = value.map((step) => {
+    const item = record(step);
+    if (!item || typeof item.title !== "string" || typeof item.detail !== "string") return undefined;
+    const action = item.action;
+    const checklist = stringArray(item.checklist);
+    let parsedAction: LessonStep["action"] | undefined;
+    if (action !== undefined) {
+      if (typeof action !== "string" || !lessonStepActions.includes(action as NonNullable<LessonStep["action"]>)) return undefined;
+      parsedAction = action as NonNullable<LessonStep["action"]>;
+    }
+    if (item.checklist !== undefined && !checklist) return undefined;
+    return {
+      title: item.title,
+      detail: item.detail,
+      ...(parsedAction ? { action: parsedAction } : {}),
+      ...(checklist ? { checklist } : {})
+    };
+  });
+  return parsed.some((step) => !step) ? undefined : (parsed as LessonStep[]);
+}
+
 function parseLesson(value: unknown, errors: string[], path: string): LessonDefinition | undefined {
   const item = record(value);
   const starterProject = record(item?.starterProject);
+  const concepts = stringArray(item?.concepts);
+  const materials = stringArray(item?.materials);
+  const steps = item?.steps === undefined ? undefined : lessonSteps(item.steps);
+  const success = stringArray(item?.success);
+  const teacherNotes = stringArray(item?.teacherNotes);
   if (
     !item ||
     typeof item.id !== "string" ||
     typeof item.title !== "string" ||
     typeof item.goal !== "string" ||
     !["icon", "word", "text"].includes(String(item.level)) ||
+    (item.minutes !== undefined && typeof item.minutes !== "number") ||
+    (item.concepts !== undefined && !concepts) ||
+    (item.materials !== undefined && !materials) ||
+    (item.steps !== undefined && !steps) ||
+    (item.success !== undefined && !success) ||
+    (item.teacherNotes !== undefined && !teacherNotes) ||
     !starterProject ||
     starterProject.schemaVersion !== "1.0.0" ||
     typeof starterProject.name !== "string" ||
@@ -738,6 +900,12 @@ function parseLesson(value: unknown, errors: string[], path: string): LessonDefi
     title: item.title,
     level: item.level as LessonDefinition["level"],
     goal: item.goal,
+    ...(typeof item.minutes === "number" ? { minutes: item.minutes } : {}),
+    ...(concepts ? { concepts } : {}),
+    ...(materials ? { materials } : {}),
+    ...(steps ? { steps } : {}),
+    ...(success ? { success } : {}),
+    ...(teacherNotes ? { teacherNotes } : {}),
     starterProject: starterProject as ProjectDocument
   };
 }

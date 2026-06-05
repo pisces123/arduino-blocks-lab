@@ -70,6 +70,7 @@ import { createCircuitStudioModel } from "./circuitStudio";
 import CircuitStudioPanel from "./CircuitStudioPanel";
 import IconBlocksPanel from "./IconBlocksPanel";
 import { createProjectIdeaMatches, type ProjectIdea } from "./ideaBuilder";
+import { createLessonGuide, lessonActionLabel, lessonLevelLabel } from "./lessonGuide";
 import { collectDeviceWorkflow, type DeviceWorkflowAction, type DeviceWorkflowRunState, type DeviceWorkflowStepState } from "./deviceWorkflow";
 import { agentSetupDocsUrl, agentSetupPlatforms, createAgentSetupScript, getAgentSetupSteps, type AgentSetupPlatform } from "./agentSetup";
 import { collectConnectionDoctor, type ConnectionDoctorAction, type ConnectionDoctorSeverity } from "./connectionDoctor";
@@ -435,6 +436,7 @@ export default function App() {
   const [componentSearch, setComponentSearch] = useState("");
   const [ideaQuery, setIdeaQuery] = useState("");
   const [missionProgress, setMissionProgress] = useState<Record<string, boolean>>(loadMissionProgress);
+  const [lessonFocusId, setLessonFocusId] = useState<string | undefined>(undefined);
   const [packUrl, setPackUrl] = useState("");
   const [packUrlBusy, setPackUrlBusy] = useState(false);
   const [packGallery, setPackGallery] = useState<PackGalleryEntry[]>([]);
@@ -542,6 +544,9 @@ export default function App() {
   };
   const completedMissionCount = activeCatalog.lessons.filter((lesson) => missionProgress[lesson.id]).length;
   const nextMission = activeCatalog.lessons.find((lesson) => !missionProgress[lesson.id]) ?? activeCatalog.lessons[0];
+  const focusedLesson =
+    activeCatalog.lessons.find((lesson) => lesson.id === (lessonFocusId ?? project.lessonId)) ?? nextMission ?? activeCatalog.lessons[0];
+  const focusedLessonGuide = useMemo(() => (focusedLesson ? createLessonGuide(focusedLesson, activeCatalog) : undefined), [activeCatalog, focusedLesson]);
   const agentSetupSteps = getAgentSetupSteps(agentSetupPlatform);
   const agentSetupScript = createAgentSetupScript(agentSetupPlatform);
   const visibleComponents = useMemo(() => {
@@ -691,6 +696,14 @@ export default function App() {
     applyProjectStyle(nextStyle);
   }
 
+  function launchLesson(lessonId: string) {
+    const lesson = activeCatalog.lessons.find((candidate) => candidate.id === lessonId);
+    if (!lesson) return;
+    setLessonFocusId(lesson.id);
+    loadProject({ ...lesson.starterProject, lessonId: lesson.id });
+    setAgentLog((current) => [`Mission launched: ${lesson.title}.`, ...current]);
+  }
+
   function createNewProject() {
     const nextProject = cloneProject({
       ...starterProjects.blink,
@@ -722,6 +735,7 @@ export default function App() {
   }
 
   function completeMission(lessonId: string) {
+    setLessonFocusId(lessonId);
     setMissionProgress((current) => ({ ...current, [lessonId]: true }));
   }
 
@@ -981,6 +995,16 @@ export default function App() {
     const guide = createBuildGuide({ ...project, generatedSketch: generated.code }, activeCatalog);
     saveBlob(`${project.name.replace(/[^a-zA-Z0-9_-]/g, "_")}-build-guide.md`, guide, "text/markdown");
     setAgentLog((current) => ["Build guide exported with parts, wiring, checks, and generated sketch.", ...current]);
+  }
+
+  function exportLessonBuildGuide(lessonId: string) {
+    const lesson = activeCatalog.lessons.find((candidate) => candidate.id === lessonId);
+    if (!lesson) return;
+    const lessonProject = { ...lesson.starterProject, lessonId: lesson.id };
+    const guide = createBuildGuide(lessonProject, activeCatalog);
+    saveBlob(`${lesson.title.replace(/[^a-zA-Z0-9_-]/g, "_")}-lesson-guide.md`, guide, "text/markdown");
+    setLessonFocusId(lesson.id);
+    setAgentLog((current) => [`Exported lesson guide: ${lesson.title}.`, ...current]);
   }
 
   async function copyShareLink() {
@@ -1459,7 +1483,7 @@ export default function App() {
                   <span style={{ width: `${(completedMissionCount / Math.max(activeCatalog.lessons.length, 1)) * 100}%` }} />
                 </div>
                 <div className="mission-actions">
-                  <button onClick={() => nextMission && loadProject({ ...nextMission.starterProject, lessonId: nextMission.id })}>
+                  <button onClick={() => nextMission && launchLesson(nextMission.id)}>
                     <Play size={16} />
                     Next
                   </button>
@@ -1470,33 +1494,146 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="mission-track">
-                {activeCatalog.lessons.map((lesson, index) => {
-                  const complete = Boolean(missionProgress[lesson.id]);
-                  const active = project.lessonId === lesson.id;
-                  return (
-                    <div className={`mission-card ${complete ? "complete" : ""} ${active ? "active" : ""}`} key={lesson.id}>
-                      <div className="mission-node">
-                        {complete ? <Medal size={20} /> : <span>{index + 1}</span>}
-                      </div>
-                      <div className="mission-copy">
-                        <span>{lesson.level}</span>
-                        <strong>{lesson.title}</strong>
-                        <p>{lesson.goal}</p>
-                      </div>
-                      <div className="mission-card-actions">
-                        <button onClick={() => loadProject({ ...lesson.starterProject, lessonId: lesson.id })}>
-                          <Play size={16} />
-                          Launch
+              <div className="mission-workbench">
+                <div className="mission-track">
+                  {activeCatalog.lessons.map((lesson, index) => {
+                    const complete = Boolean(missionProgress[lesson.id]);
+                    const active = focusedLesson?.id === lesson.id;
+                    const loaded = project.lessonId === lesson.id;
+                    return (
+                      <div className={`mission-card ${complete ? "complete" : ""} ${active ? "active" : ""}`} key={lesson.id}>
+                        <button className="mission-node" onClick={() => setLessonFocusId(lesson.id)} title={`Preview ${lesson.title}`}>
+                          {complete ? <Medal size={20} /> : <span>{index + 1}</span>}
                         </button>
-                        <button disabled={complete} onClick={() => completeMission(lesson.id)}>
-                          <CheckCircle2 size={16} />
-                          {complete ? "Done" : "Mark"}
-                        </button>
+                        <div className="mission-copy">
+                          <span>
+                            {lessonLevelLabel(lesson.level)}
+                            {loaded ? " · loaded" : ""}
+                          </span>
+                          <strong>{lesson.title}</strong>
+                          <p>{lesson.goal}</p>
+                        </div>
+                        <div className="mission-card-actions">
+                          <button onClick={() => launchLesson(lesson.id)}>
+                            <Play size={16} />
+                            Launch
+                          </button>
+                          <button onClick={() => exportLessonBuildGuide(lesson.id)}>
+                            <FileText size={16} />
+                            Guide
+                          </button>
+                          <button disabled={complete} onClick={() => completeMission(lesson.id)}>
+                            <CheckCircle2 size={16} />
+                            {complete ? "Done" : "Mark"}
+                          </button>
+                        </div>
                       </div>
+                    );
+                  })}
+                </div>
+
+                {focusedLessonGuide && (
+                  <aside className="mission-guide">
+                    <div className="mission-guide-heading">
+                      <span>{lessonLevelLabel(focusedLessonGuide.lesson.level)}</span>
+                      <strong>{focusedLessonGuide.lesson.title}</strong>
+                      <p>{focusedLessonGuide.lesson.goal}</p>
                     </div>
-                  );
-                })}
+                    <div className="mission-guide-stats">
+                      <span>
+                        <strong>{focusedLessonGuide.minutes}</strong>
+                        min
+                      </span>
+                      <span>
+                        <strong>{focusedLessonGuide.partCount}</strong>
+                        parts
+                      </span>
+                      <span>
+                        <strong>{focusedLessonGuide.wiringCount}</strong>
+                        wires
+                      </span>
+                      <span>
+                        <strong>{focusedLessonGuide.blockCount}</strong>
+                        blocks
+                      </span>
+                    </div>
+                    <div className="mission-guide-actions">
+                      <button onClick={() => launchLesson(focusedLessonGuide.lesson.id)}>
+                        <Play size={16} />
+                        Launch
+                      </button>
+                      <button onClick={() => exportLessonBuildGuide(focusedLessonGuide.lesson.id)}>
+                        <FileText size={16} />
+                        Build guide
+                      </button>
+                    </div>
+                    <div className="mission-guide-grid">
+                      <section>
+                        <h3>Materials</h3>
+                        <ul>
+                          {focusedLessonGuide.materials.map((material) => (
+                            <li key={material}>{material}</li>
+                          ))}
+                        </ul>
+                      </section>
+                      <section>
+                        <h3>Concepts</h3>
+                        <div className="mission-chip-list">
+                          {focusedLessonGuide.concepts.map((concept) => (
+                            <span key={concept}>{concept}</span>
+                          ))}
+                        </div>
+                      </section>
+                    </div>
+                    {focusedLessonGuide.libraries.length > 0 && (
+                      <section className="mission-guide-section">
+                        <h3>Libraries</h3>
+                        <div className="mission-chip-list">
+                          {focusedLessonGuide.libraries.map((library) => (
+                            <span key={library}>{library}</span>
+                          ))}
+                        </div>
+                      </section>
+                    )}
+                    <section className="mission-guide-section">
+                      <h3>Activity Steps</h3>
+                      <div className="mission-step-list">
+                        {focusedLessonGuide.steps.map((step, index) => (
+                          <article className={`mission-step ${step.action ?? "step"}`} key={`${step.title}-${index}`}>
+                            <span>{lessonActionLabel(step.action)}</span>
+                            <strong>{step.title}</strong>
+                            <p>{step.detail}</p>
+                            {step.checklist && step.checklist.length > 0 && (
+                              <ul>
+                                {step.checklist.map((item) => (
+                                  <li key={item}>{item}</li>
+                                ))}
+                              </ul>
+                            )}
+                          </article>
+                        ))}
+                      </div>
+                    </section>
+                    <section className="mission-guide-section">
+                      <h3>Success Looks Like</h3>
+                      <ul>
+                        {focusedLessonGuide.success.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </section>
+                    {focusedLessonGuide.teacherNotes.length > 0 && (
+                      <section className="mission-guide-section teacher-note">
+                        <h3>Teacher Notes</h3>
+                        <ul>
+                          {focusedLessonGuide.teacherNotes.map((note) => (
+                            <li key={note}>{note}</li>
+                          ))}
+                        </ul>
+                      </section>
+                    )}
+                  </aside>
+                )}
               </div>
             </div>
           )}

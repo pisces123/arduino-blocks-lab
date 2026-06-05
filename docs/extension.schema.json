@@ -132,7 +132,26 @@
         "title": { "type": "string" },
         "level": { "enum": ["icon", "word", "text"] },
         "goal": { "type": "string" },
+        "minutes": { "type": "number" },
+        "concepts": { "type": "array", "items": { "type": "string" } },
+        "materials": { "type": "array", "items": { "type": "string" } },
+        "steps": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/lessonStep" }
+        },
+        "success": { "type": "array", "items": { "type": "string" } },
+        "teacherNotes": { "type": "array", "items": { "type": "string" } },
         "starterProject": { "type": "object" }
+      }
+    },
+    "lessonStep": {
+      "type": "object",
+      "required": ["title", "detail"],
+      "properties": {
+        "title": { "type": "string" },
+        "detail": { "type": "string" },
+        "action": { "enum": ["build", "wire", "code", "test", "upload", "reflect"] },
+        "checklist": { "type": "array", "items": { "type": "string" } }
       }
     }
   }

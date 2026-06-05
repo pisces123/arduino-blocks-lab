@@ -48,6 +48,31 @@
       "title": "Plant Probe",
       "level": "word",
       "goal": "Read an analog soil moisture probe and print the value to Serial Monitor.",
+      "minutes": 25,
+      "concepts": ["analog input", "sensor calibration", "serial monitor"],
+      "materials": ["Arduino Uno", "Soil moisture sensor", "plant pot or damp sponge", "jumper wires"],
+      "steps": [
+        {
+          "title": "Wire the probe",
+          "detail": "Connect signal, power, and ground exactly as the starter project shows.",
+          "action": "wire",
+          "checklist": ["Signal is on A1", "VCC is on 5V", "GND is connected"]
+        },
+        {
+          "title": "Read dry and wet values",
+          "detail": "Upload, open the serial monitor, then compare readings in air and near moisture.",
+          "action": "test",
+          "checklist": ["Serial monitor opens at 9600 baud", "Dry reading is different from wet reading"]
+        },
+        {
+          "title": "Decide a threshold",
+          "detail": "Use the two readings to pick a number that could mean the plant needs water.",
+          "action": "reflect",
+          "checklist": ["A dry value is recorded", "A wet value is recorded", "A threshold is chosen"]
+        }
+      ],
+      "success": ["Serial values change when the probe moves between dry and wet material."],
+      "teacherNotes": ["Use a damp sponge for classroom testing if students do not have plants available."],
       "starterProject": {
         "schemaVersion": "1.0.0",
         "name": "Soil Monitor",

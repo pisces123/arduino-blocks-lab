@@ -113,11 +113,26 @@ export type ProjectDocument = {
   lessonId?: string;
 };
 
+export type LessonStepAction = "build" | "wire" | "code" | "test" | "upload" | "reflect";
+
+export type LessonStep = {
+  title: string;
+  detail: string;
+  action?: LessonStepAction;
+  checklist?: string[];
+};
+
 export type LessonDefinition = {
   id: string;
   title: string;
   level: "icon" | "word" | "text";
   goal: string;
+  minutes?: number;
+  concepts?: string[];
+  materials?: string[];
+  steps?: LessonStep[];
+  success?: string[];
+  teacherNotes?: string[];
   starterProject: ProjectDocument;
 };
 
