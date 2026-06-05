@@ -42,6 +42,12 @@ type BoardTarget = {
   name: string;
 };
 
+type AgentCliStatus = {
+  available: boolean;
+  cli: string;
+  error?: string;
+};
+
 function cloneProject(project: ProjectDocument): ProjectDocument {
   const cloned = JSON.parse(JSON.stringify(project)) as ProjectDocument;
   cloned.blocksXml = cloned.blocksXml ?? projectToBlocklyXml(cloned);
@@ -224,6 +230,7 @@ export default function App() {
   const [codeView, setCodeView] = useState<CodeView>("cpp");
   const [reloadKey, setReloadKey] = useState(() => crypto.randomUUID());
   const [agentOnline, setAgentOnline] = useState(false);
+  const [cliStatus, setCliStatus] = useState<AgentCliStatus | null>(null);
   const [agentLog, setAgentLog] = useState<string[]>(["Agent not checked yet."]);
   const [ports, setPorts] = useState<DetectedPort[]>([]);
   const [selectedPort, setSelectedPort] = useState("");
@@ -251,9 +258,19 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    agentHealth().then((ok) => {
+    agentHealth().then(async (ok) => {
       setAgentOnline(ok);
-      setAgentLog([ok ? "Agent connected on 127.0.0.1:47631." : "Agent is offline. Run npm run dev:agent or npm run dev."]);
+      if (!ok) {
+        setAgentLog(["Agent is offline. Run npm run dev:agent or npm run dev."]);
+        return;
+      }
+      const status = await agentRpc<AgentCliStatus>("agent.status");
+      setCliStatus(status.ok && status.data ? status.data : { available: false, cli: "arduino-cli", error: status.error });
+      setAgentLog([
+        status.ok && status.data?.available
+          ? `Agent connected. Arduino CLI ready at ${status.data.cli}.`
+          : `Agent connected, but Arduino CLI is not ready: ${status.error ?? status.data?.error ?? "unknown error"}`
+      ]);
     });
   }, []);
 
@@ -460,7 +477,7 @@ export default function App() {
         </span>
         <span className={agentOnline ? "online" : "offline"}>
           <Cable size={16} />
-          {agentOnline ? "Agent online" : "Agent offline"}
+          {agentOnline ? (cliStatus?.available ? "Agent + CLI ready" : "Agent online") : "Agent offline"}
         </span>
         {generated.warnings.map((warning) => (
           <span className="warning" key={warning}>

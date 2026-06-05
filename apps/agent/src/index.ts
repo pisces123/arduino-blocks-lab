@@ -40,6 +40,10 @@ const wss = new WebSocketServer({ server, path: "/events" });
 const sockets = new Set<WebSocket>();
 const monitors = new Map<string, MonitorSession>();
 
+app.use((_request, response, next) => {
+  response.header("Access-Control-Allow-Private-Network", "true");
+  next();
+});
 app.use(
   cors({
     origin: true,
@@ -48,10 +52,6 @@ app.use(
     credentials: false
   })
 );
-app.use((_request, response, next) => {
-  response.header("Access-Control-Allow-Private-Network", "true");
-  next();
-});
 app.use(express.json({ limit: "2mb" }));
 
 function broadcast(payload: unknown) {
@@ -84,6 +84,19 @@ async function runCliJson(args: string[]) {
   const { stdout } = await runCli([...args, "--format", "json"]);
   if (!stdout.trim()) return null;
   return JSON.parse(stdout);
+}
+
+async function cliStatus() {
+  try {
+    const version = await runCliJson(["version"]);
+    return { available: true, cli: CLI, version };
+  } catch (error) {
+    return {
+      available: false,
+      cli: CLI,
+      error: error instanceof Error ? error.message : String(error)
+    };
+  }
 }
 
 function boardById(boardId?: unknown) {
@@ -132,14 +145,19 @@ async function handleRpc(method: string, params: Record<string, unknown> = {}): 
   switch (method) {
     case "agent.health":
       return { port: PORT, cli: CLI, boards };
+    case "agent.status":
+      return cliStatus();
     case "boards.list":
       return runCliJson(["board", "list"]);
     case "boards.detect":
       return runCliJson(["board", "list"]);
     case "boards.search": {
       const query = z.string().optional().parse(params.query);
+      await runCli(["core", "update-index"], { timeout: 180_000 });
       return runCliJson(query ? ["board", "listall", query] : ["board", "listall"]);
     }
+    case "indexes.update":
+      return runCli(["core", "update-index"], { timeout: 180_000 });
     case "cores.install": {
       const core = z.string().parse(params.core);
       return runCli(["core", "install", core], { timeout: 180_000 });

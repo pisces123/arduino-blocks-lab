@@ -1,0 +1,26 @@
+name: Sensor or board pack
+description: Request or propose support for new hardware.
+title: "[hardware] "
+labels: ["hardware", "extension-pack"]
+body:
+  - type: input
+    id: hardware
+    attributes:
+      label: Hardware name
+      placeholder: DHT22, ESP32 Dev Module, MPU6050, etc.
+    validations:
+      required: true
+  - type: input
+    id: fqbn
+    attributes:
+      label: Board FQBN, if this is a board
+      placeholder: esp32:esp32:esp32
+  - type: textarea
+    id: wiring
+    attributes:
+      label: Pins, wiring, and libraries
+      placeholder: Signal pins, required library names, example links...
+  - type: textarea
+    id: lesson
+    attributes:
+      label: Beginner project idea

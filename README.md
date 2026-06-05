@@ -9,6 +9,13 @@ Open-source Arduino block coding, inspired by the friendliness of LEGO SPIKE and
 - Shared TypeScript packages for block-pack schemas, the V1 hardware catalog, and Arduino C++ generation.
 - GitHub Pages deployment workflow for the public web app.
 
+## Why this should become better than the current options
+
+- SPIKE-style friendliness, but for real Arduino hardware and open-source sensor packs.
+- Browser-based project building, with a local agent for real compile/upload instead of export-only sketches.
+- Arduino C++ as the trusted generated output, plus Python and JavaScript previews for learning.
+- A public roadmap for wiring validation, simulator exports, mission-map lessons, and community hardware packs.
+
 ## Public web app
 
 The web app is designed to deploy from GitHub Pages. After the first successful `main` workflow run, it will be available at:
@@ -37,6 +44,8 @@ npm run dev:agent
 
 The agent exposes a localhost API only. It lets the hosted web app detect boards, search Arduino CLI board targets, prepare cores and libraries, compile, upload, and open the serial monitor.
 
+More setup detail is in `docs/agent-setup.md`.
+
 ## Test it
 
 ```bash
@@ -47,3 +56,5 @@ npm run build
 ## Open source
 
 Arduino Blocks Lab is released under the MIT License. Contributions can add new block packs through the extension format in `docs/extension-format.md`.
+
+See `ROADMAP.md` and `CONTRIBUTING.md` for the next build targets.
