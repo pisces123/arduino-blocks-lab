@@ -9,6 +9,7 @@ Open-source Arduino block coding, inspired by the friendliness of LEGO SPIKE and
 - Shared TypeScript packages for block-pack schemas, the V1 hardware catalog, and Arduino C++ generation.
 - Persistent JSON hardware-pack gallery and import from files or URLs for community sensors, boards, lessons, wiring hints, and Arduino C++ snippets.
 - GitHub Pages deployment workflow for the public web app.
+- One-command local agent launcher that installs missing workspace packages, checks Arduino CLI, and starts the upload helper.
 
 ## Why this should become better than the current options
 
@@ -49,10 +50,10 @@ Install `arduino-cli` separately if you want compile/upload to real boards:
 
 ```bash
 brew install arduino-cli
-npm run dev:agent
+npm run agent
 ```
 
-The agent exposes a localhost API only. It lets the hosted web app detect boards, search Arduino CLI board targets, prepare cores and libraries, compile, upload, and open the serial monitor.
+The launcher installs missing npm packages on first run, checks for Arduino CLI, and starts the agent. The agent exposes a localhost API only. It lets the hosted web app detect boards, search Arduino CLI board targets, prepare cores and libraries, compile, upload, and open the serial monitor.
 
 More setup detail is in `docs/agent-setup.md`.
 

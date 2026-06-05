@@ -597,7 +597,7 @@ export default function App() {
     const ok = await agentHealth();
     setAgentOnline(ok);
     if (!ok) {
-      setAgentLog(["Agent is offline. Run npm run dev:agent or npm run dev."]);
+      setAgentLog(["Agent is offline. Run npm run agent from the repo folder."]);
       return;
     }
     const status = await agentRpc<AgentCliStatus>("agent.status");

@@ -17,6 +17,7 @@
     "dev": "concurrently -n web,agent -c green,cyan \"npm run dev -w @abl/web\" \"npm run dev -w @abl/agent\"",
     "dev:web": "npm run dev -w @abl/web",
     "dev:agent": "npm run dev -w @abl/agent",
+    "agent": "node scripts/launch-agent.mjs",
     "build": "npm run build --workspaces --if-present",
     "test": "vitest run",
     "test:watch": "vitest",

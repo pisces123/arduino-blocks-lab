@@ -2,19 +2,26 @@
 
 The public web app can generate and autosave projects by itself, but real USB upload needs the local agent because browsers cannot directly compile arbitrary Arduino sketches and upload them to serial boards.
 
+The simplest path after cloning this repo is:
+
+```bash
+npm run agent
+```
+
+The launcher installs missing workspace packages on first run, checks whether Arduino CLI is available, and starts the localhost helper. Keep that terminal open while using the public web app.
+
 ## macOS
 
 ```bash
 brew install arduino-cli
 git clone https://github.com/pisces123/arduino-blocks-lab.git
 cd arduino-blocks-lab
-npm install
-npm run dev:agent
+npm run agent
 ```
 
 ## Windows
 
-1. Install Node.js 22 or newer.
+1. Install Node.js 20.19 or newer.
 2. Install Arduino CLI from the official Arduino CLI releases or with a package manager.
 3. Run:
 
@@ -22,13 +29,12 @@ npm run dev:agent
 winget install ArduinoSA.CLI
 git clone https://github.com/pisces123/arduino-blocks-lab.git
 cd arduino-blocks-lab
-npm install
-npm run dev:agent
+npm run agent
 ```
 
 ## Linux
 
-1. Install Node.js 22 or newer.
+1. Install Node.js 20.19 or newer.
 2. Install Arduino CLI.
 3. Add your user to the serial port group if needed, usually `dialout`.
 4. Run:
@@ -37,9 +43,8 @@ npm run dev:agent
 curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
 git clone https://github.com/pisces123/arduino-blocks-lab.git
 cd arduino-blocks-lab
-npm install
 sudo usermod -a -G dialout $USER
-npm run dev:agent
+npm run agent
 ```
 
 ## How Board Support Works
@@ -70,7 +75,7 @@ The same panel also includes a serial console. Choose a baud rate, open Monitor,
 
 ## Troubleshooting
 
-- If the app says the agent is offline, run `npm run dev:agent`.
+- If the app says the agent is offline, run `npm run agent` from the repo folder.
 - If the app says Arduino CLI is not ready, install `arduino-cli` and make sure it is on your `PATH`.
 - If a board is not detected, try another USB cable and confirm the board appears in Arduino IDE or `arduino-cli board list`.
 - If upload fails on Linux, check serial permissions.

@@ -5,9 +5,11 @@ describe("agent setup guide", () => {
   it("offers setup steps for every supported platform", () => {
     agentSetupPlatforms.forEach((platform) => {
       const steps = getAgentSetupSteps(platform.id);
+      const script = createAgentSetupScript(platform.id);
 
-      expect(steps.length).toBeGreaterThanOrEqual(4);
-      expect(steps.at(-1)?.command).toBe("npm run dev:agent");
+      expect(steps.length).toBeGreaterThanOrEqual(3);
+      expect(steps.at(-1)?.command).toBe("npm run agent");
+      expect(script).not.toContain("npm install");
     });
   });
 
@@ -16,7 +18,7 @@ describe("agent setup guide", () => {
 
     expect(script).toContain("brew install arduino-cli");
     expect(script).toContain("git clone https://github.com/pisces123/arduino-blocks-lab.git");
-    expect(script).toContain("npm run dev:agent");
+    expect(script).toContain("npm run agent");
   });
 
   it("creates Windows and Linux platform-specific Arduino CLI commands", () => {

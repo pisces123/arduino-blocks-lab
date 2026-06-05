@@ -8,6 +8,7 @@ export type AgentSetupStep = {
 };
 
 const repoUrl = "https://github.com/pisces123/arduino-blocks-lab.git";
+const launcherCommand = "npm run agent";
 
 export const agentSetupDocsUrl = "https://github.com/pisces123/arduino-blocks-lab/blob/main/docs/agent-setup.md";
 
@@ -22,7 +23,7 @@ const platformSteps: Record<AgentSetupPlatform, AgentSetupStep[]> = {
     {
       id: "cli",
       title: "Install Arduino CLI",
-      detail: "Homebrew is the quickest path on macOS.",
+      detail: "Install Node.js 20.19 or newer first. Homebrew is the quickest Arduino CLI path on macOS.",
       command: "brew install arduino-cli"
     },
     {
@@ -32,23 +33,17 @@ const platformSteps: Record<AgentSetupPlatform, AgentSetupStep[]> = {
       command: `git clone ${repoUrl}\ncd arduino-blocks-lab`
     },
     {
-      id: "deps",
-      title: "Install app dependencies",
-      detail: "This installs the web app, agent, and shared packages.",
-      command: "npm install"
-    },
-    {
-      id: "agent",
-      title: "Start the local agent",
-      detail: "Keep this terminal open while using the public web app.",
-      command: "npm run dev:agent"
+      id: "launcher",
+      title: "Start with the launcher",
+      detail: "The launcher installs missing packages, checks Arduino CLI, and starts the helper.",
+      command: launcherCommand
     }
   ],
   windows: [
     {
       id: "cli",
       title: "Install Arduino CLI",
-      detail: "Install Node.js 22 or newer first, then install Arduino CLI.",
+      detail: "Install Node.js 20.19 or newer first, then install Arduino CLI.",
       command: "winget install ArduinoSA.CLI"
     },
     {
@@ -58,16 +53,10 @@ const platformSteps: Record<AgentSetupPlatform, AgentSetupStep[]> = {
       command: `git clone ${repoUrl}\ncd arduino-blocks-lab`
     },
     {
-      id: "deps",
-      title: "Install app dependencies",
-      detail: "Run this from PowerShell or Terminal in the repo folder.",
-      command: "npm install"
-    },
-    {
-      id: "agent",
-      title: "Start the local agent",
-      detail: "Keep this terminal open while using the public web app.",
-      command: "npm run dev:agent"
+      id: "launcher",
+      title: "Start with the launcher",
+      detail: "The launcher installs missing packages, checks Arduino CLI, and starts the helper.",
+      command: launcherCommand
     }
   ],
   linux: [
@@ -84,22 +73,16 @@ const platformSteps: Record<AgentSetupPlatform, AgentSetupStep[]> = {
       command: `git clone ${repoUrl}\ncd arduino-blocks-lab`
     },
     {
-      id: "deps",
-      title: "Install app dependencies",
-      detail: "This installs the web app, agent, and shared packages.",
-      command: "npm install"
-    },
-    {
       id: "permissions",
       title: "Allow serial access",
       detail: "Many Linux boards need dialout access. Log out and back in after this.",
       command: "sudo usermod -a -G dialout $USER"
     },
     {
-      id: "agent",
-      title: "Start the local agent",
-      detail: "Keep this terminal open while using the public web app.",
-      command: "npm run dev:agent"
+      id: "launcher",
+      title: "Start with the launcher",
+      detail: "The launcher installs missing packages, checks Arduino CLI, and starts the helper.",
+      command: launcherCommand
     }
   ]
 };
