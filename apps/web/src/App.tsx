@@ -57,6 +57,7 @@ import { describeProgramStep } from "./programDescriptions";
 import { createBuildGuide } from "./buildGuide";
 import { normalizePackUrl } from "./packUrls";
 import { parsePackGallery, resolveGalleryPackUrl, type PackGalleryEntry } from "./packGallery";
+import { createWiringCanvasModel } from "./wiringCanvas";
 
 type Mode = "blocks" | "code" | "lessons";
 type CodeView = "cpp" | "python" | "javascript";
@@ -335,6 +336,7 @@ export default function App() {
   const externalLibraries = libraryNames(project, activeCatalog);
   const wiringDiagnostics = useMemo(() => collectWiringDiagnostics(project, selectedBoard, activeCatalog.components), [project, selectedBoard, activeCatalog.components]);
   const boardPinUsage = useMemo(() => collectBoardPinUsage(project, selectedBoard, activeCatalog.components), [project, selectedBoard, activeCatalog.components]);
+  const wiringCanvas = useMemo(() => createWiringCanvasModel(project, selectedBoard, activeCatalog.components), [project, selectedBoard, activeCatalog.components]);
   const uploadReadiness = useMemo(
     () =>
       collectUploadReadiness({
@@ -360,6 +362,14 @@ export default function App() {
   );
   const readyToMonitor = agentOnline && Boolean(cliStatus?.available) && Boolean(selectedPort.trim());
   const criticalWiringCount = wiringDiagnostics.filter((diagnostic) => diagnostic.severity !== "tip").length;
+  const wiringCanvasSummary =
+    wiringCanvas.summary.total === 0
+      ? "No wires"
+      : wiringCanvas.summary.error > 0
+        ? `${wiringCanvas.summary.error} error${wiringCanvas.summary.error === 1 ? "" : "s"}`
+        : wiringCanvas.summary.warning > 0
+          ? `${wiringCanvas.summary.warning} warning${wiringCanvas.summary.warning === 1 ? "" : "s"}`
+          : `${wiringCanvas.summary.total} ready`;
   const completedMissionCount = activeCatalog.lessons.filter((lesson) => missionProgress[lesson.id]).length;
   const nextMission = activeCatalog.lessons.find((lesson) => !missionProgress[lesson.id]) ?? activeCatalog.lessons[0];
   const visibleComponents = useMemo(() => {
@@ -1146,6 +1156,36 @@ export default function App() {
                     </span>
                   </div>
                 ))
+              )}
+            </div>
+            <div className="wiring-canvas-card" aria-label="Visual wiring canvas">
+              <div className="canvas-heading">
+                <strong>Wire view</strong>
+                <span>{wiringCanvasSummary}</span>
+              </div>
+              {wiringCanvas.connections.length === 0 ? (
+                <div className="empty-row">No wires yet.</div>
+              ) : (
+                <div className="wire-rows">
+                  {wiringCanvas.connections.map((connection) => (
+                    <div
+                      className={`wire-row ${connection.status} ${connection.boardPinKind}`}
+                      key={connection.id}
+                      title={`${connection.boardPinLabel} -> ${connection.componentLabel} ${connection.wireLabel}${connection.note ? `: ${connection.note}` : ""}`}
+                    >
+                      <span className={`board-terminal ${connection.boardPinKind}`}>{connection.boardPinLabel}</span>
+                      <span className="wire-line" aria-hidden="true">
+                        <span />
+                      </span>
+                      <span className="component-terminal">
+                        <strong>{connection.componentLabel}</strong>
+                        <small>
+                          {connection.wireLabel}: {connection.wireFrom}
+                        </small>
+                      </span>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
             <div className="pin-map" aria-label="Board pin usage">

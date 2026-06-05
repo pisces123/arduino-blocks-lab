@@ -878,6 +878,162 @@ button:disabled {
   flex: 0.62;
 }
 
+.wiring-canvas-card {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ffffff, #f3fbff);
+}
+
+.canvas-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.canvas-heading strong {
+  color: #073d66;
+  font-size: 13px;
+}
+
+.canvas-heading span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.wire-rows {
+  max-height: 198px;
+  display: grid;
+  gap: 7px;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.wire-row {
+  --wire-color: var(--green);
+  min-height: 40px;
+  display: grid;
+  grid-template-columns: 76px minmax(28px, 1fr) minmax(0, 1.45fr);
+  align-items: center;
+  gap: 6px;
+}
+
+.wire-row.digital {
+  --wire-color: var(--blue);
+}
+
+.wire-row.analog {
+  --wire-color: var(--amber);
+}
+
+.wire-row.power {
+  --wire-color: var(--green);
+}
+
+.wire-row.bus {
+  --wire-color: #7d77ff;
+}
+
+.wire-row.warning {
+  --wire-color: var(--amber);
+}
+
+.wire-row.error {
+  --wire-color: var(--coral);
+}
+
+.board-terminal,
+.component-terminal {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.board-terminal {
+  min-height: 30px;
+  display: grid;
+  place-items: center;
+  color: #073d66;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.board-terminal.power {
+  color: #17563d;
+}
+
+.board-terminal.bus {
+  color: #3530a1;
+}
+
+.wire-line {
+  position: relative;
+  height: 18px;
+}
+
+.wire-line::before,
+.wire-line::after,
+.wire-line span {
+  content: "";
+  position: absolute;
+  top: 50%;
+  background: var(--wire-color);
+  transform: translateY(-50%);
+}
+
+.wire-line::before {
+  left: 0;
+  right: 0;
+  height: 4px;
+  border-radius: 999px;
+  box-shadow: 0 2px 0 rgba(17, 121, 186, 0.13);
+}
+
+.wire-line::after,
+.wire-line span {
+  width: 10px;
+  height: 10px;
+  border: 2px solid #fff;
+  border-radius: 999px;
+}
+
+.wire-line::after {
+  left: 0;
+}
+
+.wire-line span {
+  right: 0;
+}
+
+.component-terminal {
+  display: grid;
+  gap: 2px;
+  padding: 6px 8px;
+  border-left: 5px solid var(--wire-color);
+}
+
+.component-terminal strong,
+.component-terminal small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.component-terminal strong {
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.component-terminal small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
 .coach-panel {
   flex: 0 0 auto;
 }
