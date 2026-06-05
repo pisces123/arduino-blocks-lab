@@ -1,0 +1,11 @@
+node_modules
+dist
+.vite
+coverage
+*.tsbuildinfo
+.DS_Store
+work
+outputs
+arduino-cli.yaml
+*.hex
+*.elf

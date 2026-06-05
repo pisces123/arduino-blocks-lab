@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arduino-blocks-lab.local/schemas/extension.schema.json",
+  "title": "Arduino Blocks Lab Extension Manifest",
+  "type": "object",
+  "required": ["formatVersion", "id", "name", "version"],
+  "properties": {
+    "formatVersion": {
+      "const": "1.0.0"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]+$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "boards": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/board" },
+      "default": []
+    },
+    "components": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/component" },
+      "default": []
+    },
+    "blocks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/block" },
+      "default": []
+    },
+    "lessons": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/lesson" },
+      "default": []
+    }
+  },
+  "$defs": {
+    "pinMap": {
+      "type": "object",
+      "additionalProperties": {
+        "type": ["string", "number", "boolean"]
+      }
+    },
+    "library": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "installName": { "type": "string" },
+        "version": { "type": "string" }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "properties": {
+        "includes": { "type": "array", "items": { "type": "string" } },
+        "globals": { "type": "array", "items": { "type": "string" } },
+        "setup": { "type": "array", "items": { "type": "string" } },
+        "loop": { "type": "array", "items": { "type": "string" } },
+        "libraries": { "type": "array", "items": { "$ref": "#/$defs/library" } }
+      }
+    },
+    "board": {
+      "type": "object",
+      "required": ["id", "name", "fqbn", "family", "digitalPins", "analogPins", "pwmPins"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "fqbn": { "type": "string" },
+        "family": { "type": "string" },
+        "digitalPins": { "type": "array", "items": { "type": "string" } },
+        "analogPins": { "type": "array", "items": { "type": "string" } },
+        "pwmPins": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "component": {
+      "type": "object",
+      "required": ["id", "name", "category", "description", "defaultPins", "pinLabels", "wiring"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": {
+          "enum": ["output", "input", "sensor", "display", "motion", "communication", "power"]
+        },
+        "description": { "type": "string" },
+        "defaultPins": { "$ref": "#/$defs/pinMap" },
+        "pinLabels": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "wiring": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["label", "from", "to"],
+            "properties": {
+              "label": { "type": "string" },
+              "from": { "type": "string" },
+              "to": { "type": "string" },
+              "note": { "type": "string" }
+            }
+          }
+        },
+        "runtime": { "$ref": "#/$defs/runtime" },
+        "simulatorHints": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "block": {
+      "type": "object",
+      "required": ["id", "label", "category", "kind", "inputs", "description"],
+      "properties": {
+        "id": { "type": "string" },
+        "label": { "type": "string" },
+        "category": { "type": "string" },
+        "kind": { "type": "string" },
+        "inputs": { "type": "array" },
+        "description": { "type": "string" }
+      }
+    },
+    "lesson": {
+      "type": "object",
+      "required": ["id", "title", "level", "goal", "starterProject"],
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "level": { "enum": ["icon", "word", "text"] },
+        "goal": { "type": "string" },
+        "starterProject": { "type": "object" }
+      }
+    }
+  }
+}

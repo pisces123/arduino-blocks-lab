@@ -1,0 +1,10 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/block-schema" },
+    { "path": "./packages/catalog" },
+    { "path": "./packages/codegen" },
+    { "path": "./apps/agent" },
+    { "path": "./apps/web" }
+  ]
+}

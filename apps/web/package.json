@@ -1,0 +1,28 @@
+{
+  "name": "@abl/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc -p tsconfig.json && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@abl/block-schema": "0.1.0",
+    "@abl/catalog": "0.1.0",
+    "@abl/codegen": "0.1.0",
+    "@monaco-editor/react": "^4.7.0",
+    "blockly": "^12.3.1",
+    "lucide-react": "^0.544.0",
+    "monaco-editor": "^0.53.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.4",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.7"
+  }
+}

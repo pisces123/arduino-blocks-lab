@@ -1,0 +1,51 @@
+{
+  "name": "arduino-blocks-lab",
+  "version": "0.1.0",
+  "description": "Open-source Arduino block coding lab with Blockly, live Arduino C++ generation, and a local upload agent.",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pisces123/arduino-blocks-lab.git"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n web,agent -c green,cyan \"npm run dev -w @abl/web\" \"npm run dev -w @abl/agent\"",
+    "dev:web": "npm run dev -w @abl/web",
+    "dev:agent": "npm run dev -w @abl/agent",
+    "build": "npm run build --workspaces --if-present",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
+    "@vitejs/plugin-react": "^5.0.4",
+    "blockly": "^12.3.1",
+    "concurrently": "^9.2.1",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "lucide-react": "^0.544.0",
+    "monaco-editor": "^0.53.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "ws": "^8.18.3",
+    "zod": "^4.1.11"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.5.2",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "@types/ws": "^8.18.1",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.7",
+    "vitest": "^4.1.8"
+  }
+}
