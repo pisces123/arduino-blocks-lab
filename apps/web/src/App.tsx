@@ -66,6 +66,7 @@ import { createWiringCanvasModel } from "./wiringCanvas";
 import { nextThemePreference, parseThemePreference, type ThemePreference } from "./theme";
 import { createCircuitStudioModel } from "./circuitStudio";
 import CircuitStudioPanel from "./CircuitStudioPanel";
+import IconBlocksPanel from "./IconBlocksPanel";
 
 type Mode = "blocks" | "code" | "circuit" | "lessons";
 type CodeView = "cpp" | "python" | "javascript";
@@ -453,6 +454,18 @@ export default function App() {
       blocksXml,
       generatedSketch: generateSketch({ ...current, program, blocksXml }, activeCatalog).code
     }));
+  }, [activeCatalog]);
+
+  const updateFromIconBlocks = useCallback((program: ProgramStep[]) => {
+    setProject((current) => {
+      const nextProject = { ...current, program };
+      const blocksXml = projectToBlocklyXml(nextProject);
+      return {
+        ...nextProject,
+        blocksXml,
+        generatedSketch: generateSketch({ ...nextProject, blocksXml }, activeCatalog).code
+      };
+    });
   }, [activeCatalog]);
 
   useEffect(() => {
@@ -1135,14 +1148,28 @@ export default function App() {
 
         <section className="main-panel">
           {mode === "blocks" && (
-            <BlocklyWorkspace
-              components={project.components}
-              componentDefinitions={activeCatalog.components}
-              xml={project.blocksXml ?? projectToBlocklyXml(project)}
-              reloadKey={reloadKey}
-              themePreference={themePreference}
-              onChange={updateFromBlocks}
-            />
+            projectStyle === "icon" ? (
+              <IconBlocksPanel
+                project={project}
+                componentDefinitions={activeCatalog.components}
+                onProgramChange={updateFromIconBlocks}
+                onOpenCircuit={() => setMode("circuit")}
+                onOpenCode={() => {
+                  setProjectStyle("code");
+                  setMode("code");
+                  setCodeView("cpp");
+                }}
+              />
+            ) : (
+              <BlocklyWorkspace
+                components={project.components}
+                componentDefinitions={activeCatalog.components}
+                xml={project.blocksXml ?? projectToBlocklyXml(project)}
+                reloadKey={reloadKey}
+                themePreference={themePreference}
+                onChange={updateFromBlocks}
+              />
+            )
           )}
 
           {mode === "code" && (

@@ -779,6 +779,7 @@ button:disabled {
 .blockly-host,
 .code-panel,
 .circuit-panel,
+.icon-workspace,
 .lessons-panel {
   height: 100%;
   width: 100%;
@@ -790,6 +791,330 @@ button:disabled {
 
 .code-panel {
   padding: 0;
+}
+
+.icon-workspace {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 14px;
+  padding: 16px;
+  overflow: auto;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--soft-blue) 64%, transparent), transparent 36%),
+    radial-gradient(circle at 74% 20%, color-mix(in srgb, var(--amber) 18%, transparent), transparent 25%);
+}
+
+.icon-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--field), var(--soft-blue));
+}
+
+.icon-hero span,
+.icon-panel-heading span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.icon-hero > div:first-child span {
+  color: var(--deep-blue);
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.icon-hero strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--heading);
+  font-size: 23px;
+  line-height: 1.1;
+}
+
+.icon-hero-actions,
+.icon-outcome-actions,
+.icon-step-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-hero-actions button,
+.icon-outcome-actions button {
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 8px;
+  padding: 0 10px;
+  color: var(--heading);
+  font-weight: 750;
+}
+
+.icon-grid {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(210px, 0.72fr) minmax(300px, 1.28fr);
+  gap: 14px;
+}
+
+.icon-palette,
+.icon-program,
+.icon-outcome {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.icon-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.icon-panel-heading strong {
+  color: var(--heading);
+  font-size: 15px;
+}
+
+.icon-action-grid {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: 10px;
+  overflow: auto;
+}
+
+.icon-action {
+  min-height: 118px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 6px;
+  padding: 12px 9px;
+  border-radius: 8px;
+  background: var(--field);
+  text-align: center;
+}
+
+.icon-action-symbol,
+.icon-step-symbol,
+.orbit-board,
+.orbit-part {
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+}
+
+.icon-action-symbol {
+  width: 46px;
+  height: 46px;
+  color: white;
+  background: var(--blue);
+  box-shadow: 0 4px 0 rgba(17, 121, 186, 0.18);
+  animation: icon-float 4.8s ease-in-out infinite;
+}
+
+.icon-action.output .icon-action-symbol,
+.icon-step.output .icon-step-symbol {
+  background: var(--coral);
+}
+
+.icon-action.input .icon-action-symbol,
+.icon-step.input .icon-step-symbol {
+  background: var(--green);
+}
+
+.icon-action.motion .icon-action-symbol,
+.icon-step.motion .icon-step-symbol {
+  background: #8b84ff;
+}
+
+.icon-action.sensor .icon-action-symbol,
+.icon-action.serial .icon-action-symbol,
+.icon-step.sensor .icon-step-symbol,
+.icon-step.serial .icon-step-symbol {
+  background: var(--blue);
+}
+
+.icon-action.display .icon-action-symbol,
+.icon-step.display .icon-step-symbol {
+  background: var(--amber);
+  color: var(--amber-ink);
+}
+
+.icon-action.time .icon-action-symbol,
+.icon-step.time .icon-step-symbol {
+  background: var(--soft-green);
+  color: var(--green-ink);
+}
+
+.icon-action strong,
+.icon-step-copy strong {
+  display: block;
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.icon-action small {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.icon-sequence {
+  min-height: 0;
+  display: grid;
+  align-content: start;
+  gap: 9px;
+  overflow: auto;
+}
+
+.icon-step {
+  min-height: 76px;
+  display: grid;
+  grid-template-columns: 26px 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--field);
+  border-left: 6px solid var(--blue);
+}
+
+.icon-step.output {
+  border-left-color: var(--coral);
+}
+
+.icon-step.input {
+  border-left-color: var(--green);
+}
+
+.icon-step.motion {
+  border-left-color: #8b84ff;
+}
+
+.icon-step.display,
+.icon-step.time {
+  border-left-color: var(--amber);
+}
+
+.icon-step em {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--soft-blue);
+  color: var(--heading);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 850;
+}
+
+.icon-step-symbol {
+  width: 42px;
+  height: 42px;
+  color: white;
+}
+
+.icon-step-copy {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.icon-step-actions {
+  justify-content: flex-end;
+}
+
+.icon-step-actions button {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  padding: 0;
+}
+
+.icon-outcome {
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  overflow: hidden;
+}
+
+.icon-orbit {
+  grid-column: 1 / -1;
+  position: relative;
+  min-height: 150px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--soft-blue) 62%, transparent), transparent),
+    color-mix(in srgb, var(--field) 88%, var(--soft-blue));
+}
+
+.orbit-board {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 82px;
+  height: 82px;
+  color: white;
+  background: linear-gradient(135deg, var(--deep-blue), var(--blue));
+  box-shadow: 0 10px 22px rgba(17, 121, 186, 0.22);
+  transform: translate(-50%, -50%);
+}
+
+.orbit-part {
+  --angle: calc(var(--orbit-index) * 51deg);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 42px;
+  height: 42px;
+  color: var(--heading);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  font-size: 11px;
+  font-weight: 850;
+  transform:
+    rotate(var(--angle))
+    translateX(118px)
+    rotate(calc(var(--angle) * -1))
+    translate(-50%, -50%);
+}
+
+.icon-outcome-actions {
+  grid-column: 1 / -1;
+  justify-content: stretch;
+}
+
+.icon-outcome-actions button {
+  flex: 1;
 }
 
 .circuit-panel {
@@ -2203,6 +2528,16 @@ html[data-theme="dark"] .breadboard-model {
   }
 }
 
+@keyframes icon-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-2px) rotate(1deg);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -2262,6 +2597,18 @@ html[data-theme="dark"] .breadboard-model {
 
   .circuit-workbench {
     grid-template-columns: 1fr;
+  }
+
+  .icon-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .icon-action-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .icon-orbit {
+    min-height: 220px;
   }
 
   .circuit-stage {
@@ -2378,5 +2725,46 @@ html[data-theme="dark"] .breadboard-model {
     width: 112px;
     min-height: 58px;
     padding: 8px 8px 8px 12px;
+  }
+
+  .icon-workspace {
+    padding: 12px;
+  }
+
+  .icon-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .icon-hero-actions {
+    justify-content: stretch;
+  }
+
+  .icon-hero-actions button {
+    flex: 1;
+  }
+
+  .icon-action-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .icon-step {
+    grid-template-columns: 24px 38px minmax(0, 1fr);
+  }
+
+  .icon-step-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+
+  .icon-orbit {
+    min-height: 190px;
+  }
+
+  .orbit-part {
+    transform:
+      rotate(var(--angle))
+      translateX(68px)
+      rotate(calc(var(--angle) * -1))
+      translate(-50%, -50%);
   }
 }
