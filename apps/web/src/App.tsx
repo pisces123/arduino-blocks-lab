@@ -70,6 +70,7 @@ import { nextThemePreference, parseThemePreference, type ThemePreference } from 
 import { createCircuitStudioModel } from "./circuitStudio";
 import CircuitStudioPanel from "./CircuitStudioPanel";
 import IconBlocksPanel from "./IconBlocksPanel";
+import { coreFromFqbn } from "./arduinoCore";
 import { createProjectIdeaMatches, type ProjectIdea } from "./ideaBuilder";
 import { createLessonGuide, lessonActionLabel, lessonLevelLabel } from "./lessonGuide";
 import { collectDeviceWorkflow, type DeviceWorkflowAction, type DeviceWorkflowRunState, type DeviceWorkflowStepState } from "./deviceWorkflow";
@@ -428,6 +429,9 @@ export default function App() {
   const [selectedFqbn, setSelectedFqbn] = useState(defaultBoards[0]?.fqbn ?? "");
   const [boardSearch, setBoardSearch] = useState("");
   const [boardTargets, setBoardTargets] = useState<BoardTarget[]>([]);
+  const [preparedCores, setPreparedCores] = useState<string[]>([]);
+  const [coreActionTarget, setCoreActionTarget] = useState("");
+  const [coreState, setCoreState] = useState<DeviceWorkflowRunState>("idle");
   const [librariesReady, setLibrariesReady] = useState(true);
   const [compileState, setCompileState] = useState<DeviceWorkflowRunState>("idle");
   const [uploadState, setUploadState] = useState<DeviceWorkflowRunState>("idle");
@@ -457,6 +461,10 @@ export default function App() {
   const editorLanguage = codeView === "cpp" ? "cpp" : codeView;
   const selectedBoard = activeCatalog.boards.find((board) => board.id === project.boardId) ?? activeCatalog.boards[0];
   const effectiveFqbn = targetLabel(project.boardId, selectedFqbn, activeCatalog);
+  const selectedCoreTarget = useMemo(() => coreFromFqbn(effectiveFqbn), [effectiveFqbn]);
+  const selectedCore = selectedCoreTarget?.core ?? "";
+  const coreReady = Boolean(selectedCore && preparedCores.includes(selectedCore));
+  const activeCoreState = selectedCore && coreActionTarget === selectedCore ? coreState : "idle";
   const externalLibraries = libraryNames(project, activeCatalog);
   const wiringDiagnostics = useMemo(() => collectWiringDiagnostics(project, selectedBoard, activeCatalog.components), [project, selectedBoard, activeCatalog.components]);
   const wiringRepairPlan = useMemo(() => collectWiringRepairPlan(project, selectedBoard, activeCatalog.components), [project, selectedBoard, activeCatalog.components]);
@@ -479,11 +487,13 @@ export default function App() {
         agentOnline,
         cliStatus,
         fqbn: effectiveFqbn,
+        core: selectedCore,
+        coreReady,
         selectedPort,
         libraries: externalLibraries,
         wiringDiagnostics
       }),
-    [agentOnline, cliStatus, effectiveFqbn, externalLibraries, selectedPort, wiringDiagnostics]
+    [agentOnline, cliStatus, coreReady, effectiveFqbn, externalLibraries, selectedCore, selectedPort, wiringDiagnostics]
   );
   const deviceWorkflow = useMemo(
     () =>
@@ -491,6 +501,9 @@ export default function App() {
         agentOnline,
         cliStatus,
         fqbn: effectiveFqbn,
+        core: selectedCore,
+        coreReady,
+        coreState: activeCoreState,
         selectedPort,
         libraries: externalLibraries,
         librariesReady,
@@ -500,7 +513,22 @@ export default function App() {
         serialOpen,
         wiringDiagnostics
       }),
-    [agentOnline, cliStatus, compileState, effectiveFqbn, externalLibraries, librariesReady, selectedPort, serialOpen, uploadReadiness, uploadState, wiringDiagnostics]
+    [
+      agentOnline,
+      cliStatus,
+      compileState,
+      coreReady,
+      activeCoreState,
+      effectiveFqbn,
+      externalLibraries,
+      librariesReady,
+      selectedCore,
+      selectedPort,
+      serialOpen,
+      uploadReadiness,
+      uploadState,
+      wiringDiagnostics
+    ]
   );
   const connectionDoctor = useMemo(
     () =>
@@ -508,6 +536,9 @@ export default function App() {
         agentOnline,
         cliStatus,
         fqbn: effectiveFqbn,
+        core: selectedCore,
+        coreReady,
+        coreState: activeCoreState,
         selectedPort,
         libraries: externalLibraries,
         librariesReady,
@@ -518,7 +549,23 @@ export default function App() {
         wiringDiagnostics,
         recentMessages: agentLog
       }),
-    [agentLog, agentOnline, cliStatus, compileState, effectiveFqbn, externalLibraries, librariesReady, selectedPort, serialOpen, uploadReadiness, uploadState, wiringDiagnostics]
+    [
+      agentLog,
+      agentOnline,
+      cliStatus,
+      compileState,
+      coreReady,
+      activeCoreState,
+      effectiveFqbn,
+      externalLibraries,
+      librariesReady,
+      selectedCore,
+      selectedPort,
+      serialOpen,
+      uploadReadiness,
+      uploadState,
+      wiringDiagnostics
+    ]
   );
   const projectCoach = useMemo(
     () =>
@@ -837,6 +884,25 @@ export default function App() {
     setAgentLog((current) => [`Found ${targets.length} board target(s).`, ...current]);
   }
 
+  async function installCore() {
+    if (!selectedCore) {
+      setAgentLog((current) => ["Choose a full FQBN like arduino:avr:uno before preparing the board core.", ...current]);
+      return;
+    }
+
+    setCoreState("running");
+    setCoreActionTarget(selectedCore);
+    const response = await agentRpc("cores.install", { core: selectedCore });
+    setCoreState(response.ok ? "success" : "error");
+    if (response.ok) {
+      setPreparedCores((current) => (current.includes(selectedCore) ? current : [...current, selectedCore]));
+    }
+    setAgentLog((current) => [
+      response.ok ? `Prepared board core: ${selectedCore}` : `Board core install failed for ${selectedCore}: ${response.error}`,
+      ...current
+    ]);
+  }
+
   async function installLibraries() {
     const names = externalLibraries;
     if (names.length === 0) {
@@ -860,7 +926,14 @@ export default function App() {
       code: generated.code
     });
     setCompileState(response.ok ? "success" : "error");
-    if (response.ok) setLibrariesReady(true);
+    if (response.ok) {
+      setLibrariesReady(true);
+      if (selectedCore) {
+        setCoreActionTarget(selectedCore);
+        setPreparedCores((current) => (current.includes(selectedCore) ? current : [...current, selectedCore]));
+        setCoreState("success");
+      }
+    }
     setAgentLog((current) => [response.ok ? "Compile finished." : `Compile failed: ${response.error}`, ...current]);
   }
 
@@ -878,6 +951,11 @@ export default function App() {
     if (response.ok) {
       setCompileState("success");
       setLibrariesReady(true);
+      if (selectedCore) {
+        setCoreActionTarget(selectedCore);
+        setPreparedCores((current) => (current.includes(selectedCore) ? current : [...current, selectedCore]));
+        setCoreState("success");
+      }
     }
     setAgentLog((current) => [response.ok ? `Upload finished on ${selectedPort}.` : `Upload failed: ${response.error}`, ...current]);
   }
@@ -941,10 +1019,11 @@ export default function App() {
   }
 
   function workflowActionDisabled(action: DeviceWorkflowAction) {
-    if (compileState === "running" || uploadState === "running") return true;
+    if (activeCoreState === "running" || compileState === "running" || uploadState === "running") return true;
     if (action === "none") return true;
     if (action === "detect") return !agentOnline || !cliStatus?.available;
     if (action === "search-target") return !agentOnline || !cliStatus?.available;
+    if (action === "install-core") return !agentOnline || !cliStatus?.available || !selectedCore || coreReady;
     if (action === "install-libraries") return !agentOnline || !cliStatus?.available || externalLibraries.length === 0;
     if (action === "compile") return !uploadReadiness.readyToCompile;
     if (action === "upload") return !uploadReadiness.readyToUpload || compileState !== "success";
@@ -956,6 +1035,7 @@ export default function App() {
     if (action === "check-agent") return void refreshAgent();
     if (action === "detect") return void detectBoards();
     if (action === "search-target") return void searchBoards();
+    if (action === "install-core") return void installCore();
     if (action === "install-libraries") return void installLibraries();
     if (action === "compile") return void compileSketch();
     if (action === "upload") return void uploadSketch();
@@ -2052,9 +2132,20 @@ export default function App() {
               <span>Upload target FQBN</span>
               <input value={selectedFqbn} onChange={(event) => setSelectedFqbn(event.target.value)} placeholder="arduino:avr:uno" />
             </label>
+            <div className={`board-core-note ${coreReady ? "ready" : selectedCore ? "pending" : "blocked"}`}>
+              <Cpu size={16} />
+              <span>
+                <strong>{selectedCore || "Board core"}</strong>
+                {selectedCore
+                  ? coreReady
+                    ? "Prepared for this computer."
+                    : "Prepare before class, or let compile install it automatically."
+                  : "Use a full target like arduino:avr:uno."}
+              </span>
+            </div>
             <div className="board-search">
               <input value={boardSearch} onChange={(event) => setBoardSearch(event.target.value)} placeholder="Search boards, e.g. nano esp32 mega" />
-              <button title="Search all Arduino CLI boards" onClick={searchBoards}>
+              <button disabled={workflowActionDisabled("search-target")} title="Search all Arduino CLI boards" onClick={searchBoards}>
                 <Search size={16} />
               </button>
             </div>
@@ -2069,23 +2160,27 @@ export default function App() {
               </select>
             )}
             <div className="agent-actions">
-              <button onClick={detectBoards}>
+              <button disabled={workflowActionDisabled("detect")} onClick={detectBoards}>
                 <PlugZap size={16} />
                 Detect
               </button>
-              <button onClick={installLibraries}>
+              <button disabled={workflowActionDisabled("install-core")} title={selectedCore ? `Prepare ${selectedCore}` : "Choose a full FQBN first"} onClick={installCore}>
+                <Cpu size={16} />
+                {coreReady ? "Core ready" : activeCoreState === "running" ? "Preparing" : "Core"}
+              </button>
+              <button disabled={workflowActionDisabled("install-libraries")} onClick={installLibraries}>
                 <Library size={16} />
                 Libraries
               </button>
-              <button disabled={!uploadReadiness.readyToCompile} onClick={compileSketch}>
+              <button disabled={workflowActionDisabled("compile")} onClick={compileSketch}>
                 <Terminal size={16} />
                 Compile
               </button>
-              <button disabled={!uploadReadiness.readyToUpload} onClick={uploadSketch}>
+              <button disabled={workflowActionDisabled("upload")} onClick={uploadSketch}>
                 <Send size={16} />
                 Upload
               </button>
-              <button disabled={!readyToMonitor && !serialOpen} onClick={toggleSerialMonitor}>
+              <button disabled={workflowActionDisabled("monitor")} onClick={toggleSerialMonitor}>
                 <RadioTower size={16} />
                 {serialOpen ? "Close" : "Monitor"}
               </button>

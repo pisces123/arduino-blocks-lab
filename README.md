@@ -27,8 +27,9 @@ Open-source Arduino block coding, inspired by the friendliness of LEGO SPIKE and
 - Board-aware pin assistant can fix duplicate, invalid, analog, and PWM pin choices while showing a live pin usage map.
 - Wiring repair assistant translates pin conflicts into exact student-friendly repair steps and safe one-click pin moves.
 - Circuit Studio now grades simulator readiness, shows what Wokwi can export, adds breadboard preflight checks, and keeps virtual bench tests next to the 3D circuit plan.
-- Beginner-safe upload preflight shows the agent, Arduino CLI, board target, USB port, libraries, and wiring state before compile/upload.
-- Connection Doctor turns common Arduino CLI, library, USB permission, and avrdude upload failures into a likely cause and next action.
+- Beginner-safe upload preflight shows the agent, Arduino CLI, board target, board core, USB port, libraries, and wiring state before compile/upload.
+- Board-core preflight lets teachers prepare the exact Arduino CLI core for the selected FQBN before class, while compile/upload still auto-prepares when needed.
+- Connection Doctor turns common Arduino CLI core, library, USB permission, and avrdude upload failures into a likely cause and next action.
 - Built-in serial console supports baud selection, line endings, command sending, and a focused transcript for sensor debugging.
 - Arduino C++ as the trusted generated output, plus Python and JavaScript previews for learning.
 - A public roadmap for wiring validation, simulator exports, mission-map lessons, and community hardware packs.

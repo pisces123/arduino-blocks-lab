@@ -9,6 +9,8 @@ function readiness(overrides: Partial<Parameters<typeof collectUploadReadiness>[
     agentOnline: true,
     cliStatus,
     fqbn: "arduino:avr:uno",
+    core: "arduino:avr",
+    coreReady: false,
     selectedPort: "/dev/cu.usbmodem101",
     libraries: [],
     wiringDiagnostics: [],
@@ -41,6 +43,20 @@ describe("collectUploadReadiness", () => {
     expect(result.readyToCompile).toBe(true);
     expect(result.readyToUpload).toBe(false);
     expect(result.items.find((item) => item.id === "port")?.state).toBe("blocked");
+  });
+
+  it("shows an unprepared board core without blocking compile", () => {
+    const result = readiness({ coreReady: false });
+
+    expect(result.readyToCompile).toBe(true);
+    expect(result.items.find((item) => item.id === "core")?.state).toBe("info");
+  });
+
+  it("blocks compile when the FQBN cannot resolve to a core", () => {
+    const result = readiness({ fqbn: "uno", core: "" });
+
+    expect(result.readyToCompile).toBe(false);
+    expect(result.items.find((item) => item.id === "core")?.state).toBe("blocked");
   });
 
   it("keeps wiring warnings visible without blocking upload", () => {

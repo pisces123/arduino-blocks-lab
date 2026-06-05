@@ -19,6 +19,9 @@ export type ConnectionDoctorInput = {
   agentOnline: boolean;
   cliStatus: AgentCliStatus | null;
   fqbn: string;
+  core: string;
+  coreReady: boolean;
+  coreState: DeviceWorkflowRunState;
   selectedPort: string;
   libraries: string[];
   librariesReady: boolean;
@@ -61,6 +64,8 @@ export function collectConnectionDoctor(input: ConnectionDoctorInput): Connectio
   const wiringErrors = input.wiringDiagnostics.filter((diagnostic) => diagnostic.severity === "error");
   const wiringWarnings = input.wiringDiagnostics.filter((diagnostic) => diagnostic.severity === "warning");
   const hasTarget = hasValue(input.fqbn);
+  const hasCore = hasValue(input.core);
+  const coreDone = input.coreReady || input.compileState === "success" || input.uploadState === "success";
   const hasPort = hasValue(input.selectedPort);
 
   if (!input.agentOnline) {
@@ -110,6 +115,29 @@ export function collectConnectionDoctor(input: ConnectionDoctorInput): Connectio
     });
   }
 
+  if (!hasCore) {
+    return report({
+      severity: "blocked",
+      title: "Board core needs a full target",
+      summary: "Arduino CLI needs the vendor and architecture from an FQBN before it can prepare board support.",
+      fix: "Use a full target like arduino:avr:uno, or search for your exact board.",
+      action: "search-target",
+      actionLabel: "Find target"
+    });
+  }
+
+  if (input.coreState === "error") {
+    return report({
+      severity: "blocked",
+      title: "Board core did not install",
+      summary: `Arduino CLI could not prepare ${input.core}.`,
+      fix: "Update board indexes, check any third-party package URL, then try Prepare core again.",
+      action: "install-core",
+      actionLabel: "Prepare core",
+      evidence: firstEvidence(messages)
+    });
+  }
+
   if (input.compileState === "error") {
     if (
       hasAny(normalizedMessages, [
@@ -144,9 +172,9 @@ export function collectConnectionDoctor(input: ConnectionDoctorInput): Connectio
         severity: "blocked",
         title: "Board core does not match yet",
         summary: "Arduino CLI could not prepare the selected board target.",
-        fix: "Search for the board again or paste the correct FQBN, then compile once more.",
-        action: "search-target",
-        actionLabel: "Find target",
+        fix: hasCore ? `Prepare ${input.core}, then compile once more.` : "Search for the board again or paste the correct FQBN, then compile once more.",
+        action: hasCore ? "install-core" : "search-target",
+        actionLabel: hasCore ? "Prepare core" : "Find target",
         evidence: firstEvidence(messages)
       });
     }
@@ -224,6 +252,17 @@ export function collectConnectionDoctor(input: ConnectionDoctorInput): Connectio
       action: "upload",
       actionLabel: "Upload again",
       evidence: firstEvidence(messages)
+    });
+  }
+
+  if (!coreDone) {
+    return report({
+      severity: "info",
+      title: "Prepare board support",
+      summary: `The selected target uses the ${input.core} core.`,
+      fix: "Prepare the core now for a smoother first compile, especially on shared classroom computers.",
+      action: "install-core",
+      actionLabel: "Prepare core"
     });
   }
 

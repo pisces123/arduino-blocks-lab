@@ -29,6 +29,8 @@ export type UploadReadinessInput = {
   agentOnline: boolean;
   cliStatus: AgentCliStatus | null;
   fqbn: string;
+  core: string;
+  coreReady: boolean;
   selectedPort: string;
   libraries: string[];
   wiringDiagnostics: WiringDiagnostic[];
@@ -40,6 +42,7 @@ function trimLabel(value: string) {
 
 export function collectUploadReadiness(input: UploadReadinessInput): UploadReadiness {
   const fqbn = trimLabel(input.fqbn);
+  const core = trimLabel(input.core);
   const port = trimLabel(input.selectedPort);
   const wiringErrors = input.wiringDiagnostics.filter((diagnostic) => diagnostic.severity === "error");
   const wiringWarnings = input.wiringDiagnostics.filter((diagnostic) => diagnostic.severity === "warning");
@@ -85,6 +88,19 @@ export function collectUploadReadiness(input: UploadReadinessInput): UploadReadi
           id: "target",
           label: "Board target",
           detail: "Choose or search for an Arduino board target.",
+          state: "blocked"
+        },
+    core
+      ? {
+          id: "core",
+          label: "Board core",
+          detail: input.coreReady ? `${core} is prepared.` : `${core} can be prepared now or automatically during compile.`,
+          state: input.coreReady ? "ready" : "info"
+        }
+      : {
+          id: "core",
+          label: "Board core",
+          detail: fqbn ? "Use a full FQBN like arduino:avr:uno." : "Choose a board target first.",
           state: "blocked"
         },
     port
@@ -147,7 +163,7 @@ export function collectUploadReadiness(input: UploadReadinessInput): UploadReadi
 
   const blockedCount = items.filter((item) => item.state === "blocked").length;
   const warningCount = items.filter((item) => item.state === "warning").length;
-  const readyToCompile = input.agentOnline && Boolean(input.cliStatus?.available) && Boolean(fqbn) && wiringErrors.length === 0;
+  const readyToCompile = input.agentOnline && Boolean(input.cliStatus?.available) && Boolean(fqbn) && Boolean(core) && wiringErrors.length === 0;
   const readyToUpload = readyToCompile && Boolean(port);
 
   return {

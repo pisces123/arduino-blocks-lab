@@ -15,6 +15,9 @@ const baseInput: ConnectionDoctorInput = {
   agentOnline: true,
   cliStatus: { available: true, cli: "arduino-cli" },
   fqbn: "arduino:avr:uno",
+  core: "arduino:avr",
+  coreReady: true,
+  coreState: "idle",
   selectedPort: "/dev/cu.usbmodem101",
   libraries: [],
   librariesReady: true,
@@ -51,6 +54,40 @@ describe("collectConnectionDoctor", () => {
 
     expect(result.action).toBe("install-libraries");
     expect(result.fix).toContain("DHT sensor library");
+  });
+
+  it("prompts for core preparation before first compile on a fresh machine", () => {
+    const result = collectConnectionDoctor({
+      ...baseInput,
+      coreReady: false
+    });
+
+    expect(result.action).toBe("install-core");
+    expect(result.title).toBe("Prepare board support");
+  });
+
+  it("offers core preparation when Arduino CLI reports a missing platform", () => {
+    const result = collectConnectionDoctor({
+      ...baseInput,
+      coreReady: false,
+      compileState: "error",
+      recentMessages: ["Compile failed: platform arduino:avr is not installed"]
+    });
+
+    expect(result.action).toBe("install-core");
+    expect(result.fix).toContain("arduino:avr");
+  });
+
+  it("blocks incomplete FQBNs before Arduino CLI sees them", () => {
+    const result = collectConnectionDoctor({
+      ...baseInput,
+      fqbn: "uno",
+      core: "",
+      coreReady: false
+    });
+
+    expect(result.action).toBe("search-target");
+    expect(result.title).toContain("full target");
   });
 
   it("diagnoses blocked serial ports during upload", () => {

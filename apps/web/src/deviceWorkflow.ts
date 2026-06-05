@@ -1,7 +1,16 @@
 import type { AgentCliStatus, UploadReadiness } from "./uploadReadiness";
 import type { WiringDiagnostic } from "./wiringDiagnostics";
 
-export type DeviceWorkflowAction = "check-agent" | "detect" | "search-target" | "install-libraries" | "compile" | "upload" | "monitor" | "none";
+export type DeviceWorkflowAction =
+  | "check-agent"
+  | "detect"
+  | "search-target"
+  | "install-core"
+  | "install-libraries"
+  | "compile"
+  | "upload"
+  | "monitor"
+  | "none";
 export type DeviceWorkflowStepState = "done" | "current" | "waiting" | "warning" | "blocked";
 export type DeviceWorkflowRunState = "idle" | "running" | "success" | "error";
 
@@ -26,6 +35,9 @@ export type DeviceWorkflowInput = {
   agentOnline: boolean;
   cliStatus: AgentCliStatus | null;
   fqbn: string;
+  core: string;
+  coreReady: boolean;
+  coreState: DeviceWorkflowRunState;
   selectedPort: string;
   libraries: string[];
   librariesReady: boolean;
@@ -52,6 +64,8 @@ function actionLabel(action: DeviceWorkflowAction) {
       return "Detect board";
     case "search-target":
       return "Find target";
+    case "install-core":
+      return "Prepare core";
     case "install-libraries":
       return "Install libraries";
     case "compile":
@@ -68,9 +82,11 @@ function actionLabel(action: DeviceWorkflowAction) {
 export function collectDeviceWorkflow(input: DeviceWorkflowInput): DeviceWorkflow {
   const agentReady = input.agentOnline && Boolean(input.cliStatus?.available);
   const hasTarget = hasValue(input.fqbn);
+  const hasCore = hasValue(input.core);
   const hasPort = hasValue(input.selectedPort);
   const libraryCount = input.libraries.length;
   const librariesDone = libraryCount === 0 || input.librariesReady || input.compileState === "success" || input.uploadState === "success";
+  const coreDone = input.coreReady || input.compileState === "success" || input.uploadState === "success";
   const hasWiringErrors = input.wiringDiagnostics.some((diagnostic) => diagnostic.severity === "error");
   const hasWiringWarnings = input.wiringDiagnostics.some((diagnostic) => diagnostic.severity === "warning");
   const compileDone = input.compileState === "success" || input.uploadState === "success";
@@ -101,6 +117,33 @@ export function collectDeviceWorkflow(input: DeviceWorkflowInput): DeviceWorkflo
       detail: hasTarget ? input.fqbn : "Choose or search for the Arduino target.",
       state: hasTarget ? "done" : agentReady ? "current" : "waiting",
       action: "search-target"
+    },
+    {
+      id: "core",
+      label: "Board core",
+      detail: hasCore
+        ? coreDone
+          ? `${input.core} is prepared.`
+          : input.coreState === "running"
+            ? `Installing ${input.core}.`
+            : input.coreState === "error"
+              ? `Could not install ${input.core}. Check package indexes.`
+              : `Prepare ${input.core} now, or let compile install it automatically.`
+        : hasTarget
+          ? "Use a full FQBN with vendor and architecture, like arduino:avr:uno."
+          : "Choose a board target first.",
+      state: coreDone
+        ? "done"
+        : input.coreState === "running"
+          ? "current"
+          : input.coreState === "error"
+            ? "blocked"
+            : hasCore && agentReady
+              ? "current"
+              : hasTarget
+                ? "blocked"
+                : "waiting",
+      action: hasCore ? "install-core" : "search-target"
     },
     {
       id: "libraries",

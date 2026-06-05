@@ -3615,6 +3615,49 @@ html[data-theme="dark"] .breadboard-model {
   font-size: 12px;
 }
 
+.board-core-note {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--soft-blue) 48%, var(--field));
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.board-core-note svg {
+  margin-top: 1px;
+  color: var(--deep-blue);
+}
+
+.board-core-note strong {
+  display: block;
+  color: var(--heading);
+  font-size: 12px;
+}
+
+.board-core-note.ready {
+  background: var(--soft-green);
+  border-color: color-mix(in srgb, var(--green) 42%, var(--line));
+}
+
+.board-core-note.ready svg {
+  color: var(--green);
+}
+
+.board-core-note.blocked {
+  background: var(--soft-coral);
+  border-color: color-mix(in srgb, var(--coral) 42%, var(--line));
+}
+
+.board-core-note.blocked svg {
+  color: var(--coral);
+}
+
 .board-search {
   display: grid;
   grid-template-columns: 1fr 40px;

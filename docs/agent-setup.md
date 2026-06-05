@@ -57,16 +57,19 @@ arduino:avr:nano
 arduino:avr:mega
 ```
 
+The web app derives the board core from the first two FQBN parts. For example, `arduino:avr:uno` uses the `arduino:avr` core. Use the Board panel's Core button to prepare that core before class, or let compile/upload prepare it automatically when needed.
+
 When you compile or upload, the agent prepares the matching core and project libraries before running `arduino-cli compile` or `arduino-cli upload`.
 
 For third-party boards, install or configure their Arduino CLI package index first, then paste the board FQBN into the app.
 
-The Board panel in the web app shows an upload readiness checklist before compile/upload. It checks the local agent, Arduino CLI, FQBN target, USB port, required libraries, and wiring diagnostics so beginners can fix setup issues before seeing raw compiler output.
+The Board panel in the web app shows an upload readiness checklist before compile/upload. It checks the local agent, Arduino CLI, FQBN target, board core, USB port, required libraries, and wiring diagnostics so beginners can fix setup issues before seeing raw compiler output.
 
 The same panel includes Connection Doctor. It watches the current setup state and recent compile/upload messages, then turns common failures into a likely cause and a next action:
 
 - Missing headers or library errors point learners to the Libraries button.
-- Invalid FQBN or missing core errors point learners back to board target search.
+- Invalid FQBN errors point learners back to board target search.
+- Missing platform or board-core errors point learners to Prepare core.
 - USB permission, access denied, or busy-port errors point learners to port setup help.
 - `avrdude`, sync, timeout, or no-device upload errors point learners to board target, port, cable, and reset checks.
 - Generic compile errors point learners to the Arduino C++ view so the generated sketch stays visible.

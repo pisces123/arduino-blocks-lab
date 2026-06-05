@@ -5,6 +5,9 @@ const baseInput: DeviceWorkflowInput = {
   agentOnline: true,
   cliStatus: { available: true, cli: "arduino-cli" },
   fqbn: "arduino:avr:uno",
+  core: "arduino:avr",
+  coreReady: true,
+  coreState: "idle",
   selectedPort: "/dev/cu.usbmodem101",
   libraries: [],
   librariesReady: true,
@@ -47,6 +50,29 @@ describe("collectDeviceWorkflow", () => {
     expect(workflow.nextAction).toBe("detect");
     expect(workflow.steps.find((step) => step.id === "compile")?.state).toBe("current");
     expect(workflow.steps.find((step) => step.id === "upload")?.state).toBe("waiting");
+  });
+
+  it("prompts teachers to prepare a valid board core before libraries and compile", () => {
+    const workflow = collectDeviceWorkflow({
+      ...baseInput,
+      coreReady: false
+    });
+
+    expect(workflow.nextAction).toBe("install-core");
+    expect(workflow.steps.find((step) => step.id === "core")?.state).toBe("current");
+  });
+
+  it("sends incomplete board targets back to target search", () => {
+    const workflow = collectDeviceWorkflow({
+      ...baseInput,
+      fqbn: "uno",
+      core: "",
+      coreReady: false,
+      uploadReadiness: { ...baseInput.uploadReadiness, readyToCompile: false, readyToUpload: false }
+    });
+
+    expect(workflow.nextAction).toBe("search-target");
+    expect(workflow.steps.find((step) => step.id === "core")?.state).toBe("blocked");
   });
 
   it("moves to upload after a successful compile", () => {
