@@ -376,6 +376,107 @@ button:disabled {
   color: var(--deep-blue);
 }
 
+.idea-section {
+  flex: 0 0 285px;
+}
+
+.idea-search {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--field), var(--soft-blue));
+  color: var(--deep-blue);
+}
+
+.idea-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+}
+
+.idea-list {
+  min-height: 0;
+  display: grid;
+  gap: 8px;
+  overflow: auto;
+}
+
+.idea-card {
+  width: 100%;
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border-left: 5px solid var(--blue);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--soft-blue) 46%, transparent), transparent 62%),
+    var(--field);
+  text-align: left;
+}
+
+.idea-card:nth-child(2n) {
+  border-left-color: var(--amber);
+}
+
+.idea-card:nth-child(3n) {
+  border-left-color: var(--green);
+}
+
+.idea-card strong,
+.idea-card p,
+.idea-card span {
+  min-width: 0;
+}
+
+.idea-card strong {
+  color: var(--heading);
+  font-size: 14px;
+}
+
+.idea-card p {
+  margin: 0;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.idea-topline,
+.idea-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--deep-blue);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.idea-outcome {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.idea-meta {
+  justify-content: flex-start;
+  color: var(--muted);
+  text-transform: none;
+}
+
+.idea-meta span {
+  padding: 3px 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--soft-blue) 70%, var(--field));
+}
+
 .component-search input {
   width: 100%;
   min-width: 0;

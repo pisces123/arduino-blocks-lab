@@ -67,6 +67,7 @@ import { nextThemePreference, parseThemePreference, type ThemePreference } from 
 import { createCircuitStudioModel } from "./circuitStudio";
 import CircuitStudioPanel from "./CircuitStudioPanel";
 import IconBlocksPanel from "./IconBlocksPanel";
+import { createProjectIdeaMatches, type ProjectIdea } from "./ideaBuilder";
 
 type Mode = "blocks" | "code" | "circuit" | "lessons";
 type CodeView = "cpp" | "python" | "javascript";
@@ -338,6 +339,63 @@ const starterCards: StarterCard[] = [
   }
 ];
 
+const projectIdeas: ProjectIdea[] = [
+  {
+    id: "blink",
+    title: "Blink a light",
+    tag: "First upload",
+    prompt: "I want to make the board prove it is alive.",
+    outcome: "Built-in LED turns on and off once per second.",
+    keywords: ["blink", "led", "light", "first", "starter", "hello"],
+    project: starterProjects.blink
+  },
+  {
+    id: "button-led",
+    title: "Button switch",
+    tag: "Input",
+    prompt: "I want a button to control a light.",
+    outcome: "A pushbutton reads input and switches an LED.",
+    keywords: ["button", "switch", "press", "led", "input"],
+    project: starterProjects.buttonLed
+  },
+  {
+    id: "servo-knob",
+    title: "Servo knob",
+    tag: "Motion",
+    prompt: "I want a knob to move something.",
+    outcome: "A potentiometer maps to a servo angle.",
+    keywords: ["servo", "knob", "motion", "angle", "potentiometer", "robot arm"],
+    project: starterProjects.servoKnob
+  },
+  {
+    id: "distance-meter",
+    title: "Distance meter",
+    tag: "Sensor",
+    prompt: "I want to measure how far away something is.",
+    outcome: "Ultrasonic sensor prints distance in centimeters.",
+    keywords: ["distance", "ultrasonic", "sensor", "measure", "robot eyes", "avoid"],
+    project: starterProjects.ultrasonicDistance
+  },
+  {
+    id: "weather-lcd",
+    title: "Weather display",
+    tag: "Display",
+    prompt: "I want to show temperature and humidity.",
+    outcome: "DHT sensor reads weather and an LCD shows status text.",
+    keywords: ["weather", "temperature", "humidity", "dht", "lcd", "display", "screen"],
+    project: starterProjects.dhtDisplay
+  },
+  {
+    id: "neopixel-glow",
+    title: "Color animation",
+    tag: "Color",
+    prompt: "I want a colorful LED animation.",
+    outcome: "NeoPixel strip switches between glowing colors.",
+    keywords: ["color", "neopixel", "animation", "strip", "rgb", "light"],
+    project: starterProjects.neopixelAnimation
+  }
+];
+
 export default function App() {
   const [extensionPacks, setExtensionPacks] = useState<ImportedExtensionPack[]>(loadExtensionPacks);
   const [project, setProject] = useState<ProjectDocument>(() => cloneProject(loadInitialProject()));
@@ -365,6 +423,7 @@ export default function App() {
   const [serialTranscript, setSerialTranscript] = useState<string[]>(["Serial monitor is closed."]);
   const [selectedCategory, setSelectedCategory] = useState<ComponentDefinition["category"]>("output");
   const [componentSearch, setComponentSearch] = useState("");
+  const [ideaQuery, setIdeaQuery] = useState("");
   const [missionProgress, setMissionProgress] = useState<Record<string, boolean>>(loadMissionProgress);
   const [packUrl, setPackUrl] = useState("");
   const [packUrlBusy, setPackUrlBusy] = useState(false);
@@ -446,6 +505,7 @@ export default function App() {
       [component.name, component.description, component.category, component.id].join(" ").toLowerCase().includes(query)
     );
   }, [activeCatalog.components, componentSearch, selectedCategory]);
+  const ideaMatches = useMemo(() => createProjectIdeaMatches(projectIdeas, ideaQuery, activeCatalog.components, 4), [activeCatalog.components, ideaQuery]);
 
   const updateFromBlocks = useCallback((program: ProgramStep[], blocksXml: string) => {
     setProject((current) => ({
@@ -578,6 +638,13 @@ export default function App() {
     applyProjectStyle(newProjectStyle);
     setNewProjectOpen(false);
     setAgentLog((current) => [`Created Project 1 in ${projectStyleOptions.find((option) => option.id === newProjectStyle)?.title ?? "Word Blocks"}.`, ...current]);
+  }
+
+  function loadIdeaProject(idea: ProjectIdea) {
+    const nextStyle = projectStyle === "code" ? "word" : projectStyle;
+    loadProject(idea.project, nextStyle);
+    if (mode !== "circuit") setMode("blocks");
+    setAgentLog((current) => [`Idea loaded: ${idea.title}.`, ...current]);
   }
 
   function removeExtensionPack(packId: string) {
@@ -1041,6 +1108,44 @@ export default function App() {
 
       <div className="workspace-grid">
         <aside className="left-panel">
+          <section className="panel-section idea-section">
+            <div className="section-heading">
+              <h2>Make</h2>
+              <span>{ideaMatches.length}</span>
+            </div>
+            <label className="idea-search">
+              <Sparkles size={15} />
+              <input
+                aria-label="Describe what you want to build"
+                value={ideaQuery}
+                onChange={(event) => setIdeaQuery(event.target.value)}
+                placeholder="Try distance, weather, button"
+              />
+            </label>
+            <div className="idea-list">
+              {ideaMatches.map((idea) => (
+                <button
+                  className="idea-card"
+                  key={idea.id}
+                  onClick={() => loadIdeaProject(idea)}
+                  title={`Build ${idea.title}`}
+                >
+                  <span className="idea-topline">
+                    <span>{idea.tag}</span>
+                    <span>{idea.partNames.length} parts</span>
+                  </span>
+                  <strong>{idea.title}</strong>
+                  <p>{idea.prompt}</p>
+                  <span className="idea-outcome">{idea.outcome}</span>
+                  <span className="idea-meta">
+                    <span>{idea.blockCount} blocks</span>
+                    <span>{idea.wiringCount} wires</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
+
           <section className="panel-section starter-section">
             <div className="section-heading">
               <h2>Starters</h2>
