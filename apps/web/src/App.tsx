@@ -50,6 +50,7 @@ import {
 } from "@abl/catalog";
 import { generateSketch } from "@abl/codegen";
 import BlocklyWorkspace from "./BlocklyWorkspace";
+import LandingPage from "./LandingPage";
 import { AGENT_STATUS_URL, agentHealth, agentRpc, openAgentEvents } from "./agentClient";
 import { projectToBlocklyXml } from "./projectXml";
 import { collectWiringDiagnostics } from "./wiringDiagnostics";
@@ -59,7 +60,7 @@ import { parseStoredProject, serializeProject } from "./projectStorage";
 import { collectUploadReadiness, type AgentCliStatus, type UploadChecklistState } from "./uploadReadiness";
 import { appendSerialLineEnding, commonBaudRates, lineEndingLabel, normalizeBaudRate, type SerialLineEnding } from "./serialConsole";
 import { autoAssignProjectPins, collectBoardPinUsage } from "./pinPlanner";
-import { projectFromShareHash, shareUrlForProject } from "./projectShare";
+import { projectFromShareHash, projectShareHashPrefix, shareUrlForProject } from "./projectShare";
 import { collectProjectCoach, type CoachStepState } from "./projectCoach";
 import { describeProgramStep } from "./programDescriptions";
 import { createBuildGuide } from "./buildGuide";
@@ -287,6 +288,10 @@ function loadInitialProject(): ProjectDocument {
   return loadSharedProject() ?? loadCurrentProject() ?? starterProjects.blink;
 }
 
+function shouldShowLandingPage() {
+  return window.location.hash !== "#workspace" && !window.location.hash.startsWith(projectShareHashPrefix);
+}
+
 function learningPreview(project: ProjectDocument, language: Exclude<CodeView, "cpp">, catalog: Catalog): string {
   const board = boardName(project.boardId, catalog);
   const steps = project.program.map((step) =>
@@ -428,6 +433,7 @@ export default function App() {
   const [mode, setMode] = useState<Mode>("blocks");
   const [codeView, setCodeView] = useState<CodeView>("cpp");
   const [projectStyle, setProjectStyle] = useState<ProjectStyle>("word");
+  const [landingOpen, setLandingOpen] = useState(shouldShowLandingPage);
   const [newProjectOpen, setNewProjectOpen] = useState(false);
   const [newProjectStyle, setNewProjectStyle] = useState<ProjectStyle>("word");
   const [agentSetupOpen, setAgentSetupOpen] = useState(false);
@@ -788,8 +794,13 @@ export default function App() {
 
   useEffect(() => {
     const handleHashChange = () => {
+      if (window.location.hash === "#workspace") {
+        setLandingOpen(false);
+        return;
+      }
       const shared = loadSharedProject();
       if (!shared) return;
+      setLandingOpen(false);
       loadProject(shared);
       setShareStatus("Shared link loaded");
     };
@@ -1305,6 +1316,37 @@ export default function App() {
     const url = resolveGalleryPackUrl(entry, window.location.href);
     setPackUrl(url);
     void importExtensionPackFromUrl(url);
+  }
+
+  function enterWorkspace(nextMode: Mode = "blocks") {
+    setLandingOpen(false);
+    if (!window.location.hash.startsWith(projectShareHashPrefix)) {
+      window.history.replaceState(null, "", "#workspace");
+    }
+    if (nextMode === "code") {
+      setProjectStyle("code");
+      setCodeView("cpp");
+      setMode("code");
+      return;
+    }
+    if (nextMode === "blocks" && projectStyle === "code") {
+      setProjectStyle("word");
+    }
+    setMode(nextMode);
+  }
+
+  if (landingOpen) {
+    return (
+      <LandingPage
+        boardCount={activeCatalog.boards.length}
+        componentCount={activeCatalog.components.length}
+        lessonCount={activeCatalog.lessons.length}
+        onStart={() => enterWorkspace("blocks")}
+        onOpenCircuit={() => enterWorkspace("circuit")}
+        onOpenCode={() => enterWorkspace("code")}
+        onOpenLessons={() => enterWorkspace("lessons")}
+      />
+    );
   }
 
   return (
