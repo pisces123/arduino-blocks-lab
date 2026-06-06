@@ -85,6 +85,11 @@ export type BlockDefinition = {
 export type ProgramStep =
   | { kind: "digital-write"; componentId?: string; pin?: PinValue; value: "HIGH" | "LOW" | boolean }
   | { kind: "digital-if-write"; inputPin: PinValue; expectedValue: "HIGH" | "LOW"; outputPin: PinValue; outputValue: "HIGH" | "LOW" }
+  | { kind: "if-pin"; pin: PinValue; expectedValue: "HIGH" | "LOW"; then: ProgramStep[] }
+  | { kind: "if-pin-else"; pin: PinValue; expectedValue: "HIGH" | "LOW"; then: ProgramStep[]; else?: ProgramStep[] }
+  | { kind: "repeat"; count: number | string; body: ProgramStep[] }
+  | { kind: "while-pin"; pin: PinValue; expectedValue: "HIGH" | "LOW"; body: ProgramStep[] }
+  | { kind: "digital-toggle"; pin: PinValue }
   | { kind: "pin-mode"; pin: PinValue; mode: "INPUT" | "OUTPUT" | "INPUT_PULLUP"; }
   | { kind: "analog-write"; componentId?: string; pin?: PinValue; value: number | string }
   | { kind: "delay"; ms: number }
@@ -102,6 +107,7 @@ export type ProgramStep =
   | { kind: "oled-print"; componentId: string; text: string; x?: number; y?: number; clear?: boolean }
   | { kind: "neopixel-fill"; componentId: string; red: number; green: number; blue: number }
   | { kind: "tone"; componentId: string; frequency: number; duration?: number }
+  | { kind: "tone-stop"; componentId: string }
   | { kind: "relay-write"; componentId: string; value: "HIGH" | "LOW" | boolean }
   | { kind: "ir-read-serial"; componentId: string };
 

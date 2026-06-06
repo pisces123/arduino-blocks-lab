@@ -20,6 +20,11 @@ function sanitizeIdentifier(value: string): string {
   return /^[a-zA-Z_]/.test(cleaned) ? cleaned : `component_${cleaned}`;
 }
 
+function sanitizePinForVariable(value: PinValue | undefined): string {
+  const literal = pinLiteral(value);
+  return sanitizeIdentifier(`pin_${literal}`);
+}
+
 function pinLiteral(value: PinValue | undefined): string {
   if (value === undefined) return "0";
   if (typeof value === "number") return String(value);
@@ -121,6 +126,36 @@ function emitStep(step: ProgramStep, helpers: ReturnType<typeof componentLookup>
         `  digitalWrite(${pinLiteral(step.outputPin)}, ${step.outputValue});`,
         `}`
       ];
+    case "if-pin": {
+      const body = emitSteps(step.then, helpers);
+      if (body.length === 0) {
+        return [`if (digitalRead(${pinLiteral(step.pin)}) == ${step.expectedValue}) {`, `  // no-op`, `}`];
+      }
+      return [`if (digitalRead(${pinLiteral(step.pin)}) == ${step.expectedValue}) {`, ...indent(body, 2), `}`];
+    }
+    case "if-pin-else": {
+      const thenBody = emitSteps(step.then, helpers);
+      const elseBody = emitSteps(step.else ?? [], helpers);
+      return [
+        `if (digitalRead(${pinLiteral(step.pin)}) == ${step.expectedValue}) {`,
+        ...(thenBody.length === 0 ? ["  // no-op"] : indent(thenBody, 2)),
+        `} else {`,
+        ...(elseBody.length === 0 ? ["  // no-op"] : indent(elseBody, 2)),
+        `}`
+      ];
+    }
+    case "repeat":
+      return [`for (int abl_i = 0; abl_i < ${step.count}; ++abl_i) {`, ...indent(emitSteps(step.body, helpers), 2), `}`];
+    case "while-pin":
+      return [`while (digitalRead(${pinLiteral(step.pin)}) == ${step.expectedValue}) {`, ...indent(emitSteps(step.body, helpers), 2), `}`];
+    case "digital-toggle": {
+      const variable = sanitizePinForVariable(step.pin);
+      return [
+        `static bool ${variable} = false;`,
+        `${variable} = !${variable};`,
+        `digitalWrite(${pinLiteral(step.pin)}, ${variable} ? HIGH : LOW);`
+      ];
+    }
     case "button-controls-led": {
       const buttonPin = helpers.pin(step.buttonId);
       const ledPin = helpers.pin(step.ledId);
@@ -209,6 +244,10 @@ function emitStep(step: ProgramStep, helpers: ReturnType<typeof componentLookup>
       const component = helpers.getInstance(step.componentId);
       return [`tone(${pinLiteral(component?.pins.signal)}, ${step.frequency}, ${step.duration ?? 250});`];
     }
+    case "tone-stop": {
+      const component = helpers.getInstance(step.componentId);
+      return [`noTone(${pinLiteral(component?.pins.signal)});`];
+    }
     case "relay-write":
       return [`digitalWrite(${helpers.pin(step.componentId)}, ${valueAsHighLow(step.value)});`];
     case "ir-read-serial":
@@ -222,6 +261,10 @@ function emitStep(step: ProgramStep, helpers: ReturnType<typeof componentLookup>
     default:
       return [`// Unsupported block: ${(step as ProgramStep).kind}`];
   }
+}
+
+function emitSteps(steps: ProgramStep[], helpers: ReturnType<typeof componentLookup>): string[] {
+  return steps.flatMap((step) => emitStep(step, helpers));
 }
 
 function indent(lines: string[], spaces = 2): string[] {

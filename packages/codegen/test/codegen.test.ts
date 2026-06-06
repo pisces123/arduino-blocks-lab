@@ -57,6 +57,33 @@ describe("generateSketch", () => {
       { components: [], step: () => ({ kind: "analog-write", pin: 9, value: 128 }), expected: "analogWrite(9, 128)" },
       { components: [], step: () => ({ kind: "delay", ms: 42 }), expected: "delay(42)" },
       { components: [], step: () => ({ kind: "serial-print", value: "hello" }), expected: "Serial.println(\"hello\")" },
+      { components: [], step: () => ({ kind: "digital-toggle", pin: 13 }), expected: "static bool pin_13 = false;" },
+      { components: [], step: () => ({ kind: "repeat", count: 3, body: [{ kind: "digital-write", pin: 13, value: "HIGH" }] }), expected: "for (int abl_i = 0; abl_i < 3; ++abl_i)" },
+      {
+        components: [],
+        step: () => ({ kind: "if-pin", pin: 2, expectedValue: "HIGH", then: [{ kind: "digital-write", pin: 13, value: "LOW" }] }),
+        expected: "if (digitalRead(2) == HIGH)"
+      },
+      {
+        components: ["button", "led"],
+        step: ({ button, led }) => ({
+          kind: "if-pin-else",
+          pin: 2,
+          expectedValue: "HIGH",
+          then: [{ kind: "digital-write", componentId: led!.id, value: "HIGH" }],
+          else: [{ kind: "digital-write", componentId: led!.id, value: "LOW" }]
+        }),
+        expected: "if (digitalRead(2) == HIGH)"
+      },
+      { components: [], step: () => ({ kind: "while-pin", pin: 3, expectedValue: "LOW", body: [{ kind: "delay", ms: 15 }] }), expected: "while (digitalRead(3) == LOW)" },
+      {
+        components: ["buzzer"],
+        step: ({ buzzer }) => ({
+          kind: "tone-stop",
+          componentId: buzzer!.id
+        }),
+        expected: "noTone(8)"
+      },
       { components: ["potentiometer"], step: ({ potentiometer }) => ({ kind: "read-analog-serial", componentId: potentiometer!.id }), expected: "analogRead(A0)" },
       { components: ["pir"], step: ({ pir }) => ({ kind: "read-digital-serial", componentId: pir!.id }), expected: "digitalRead(3)" },
       {

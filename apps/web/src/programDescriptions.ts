@@ -6,6 +6,16 @@ export function describeProgramStep(step: ProgramStep): string {
       return `set digital output ${step.componentId ?? step.pin} to ${step.value}`;
     case "digital-if-write":
       return `if pin ${step.inputPin} is ${step.expectedValue}, set pin ${step.outputPin} to ${step.outputValue}`;
+    case "if-pin":
+      return `if pin ${step.pin} is ${step.expectedValue}, run ${step.then.length} step${step.then.length === 1 ? "" : "s"} inside.`;
+    case "if-pin-else":
+      return `if pin ${step.pin} is ${step.expectedValue}, run ${step.then.length} step${step.then.length === 1 ? "" : "s"} in then and ${step.else?.length ?? 0} in else.`;
+    case "repeat":
+      return `repeat ${step.count} time${String(step.count) === "1" ? "" : "s"} for the following steps`;
+    case "while-pin":
+      return `run steps while pin ${step.pin} is ${step.expectedValue}.`;
+    case "digital-toggle":
+      return `toggle output on pin ${step.pin}`;
     case "pin-mode":
       return `set pin ${step.pin} mode to ${step.mode}`;
     case "analog-write":
@@ -36,6 +46,8 @@ export function describeProgramStep(step: ProgramStep): string {
       return `fill NeoPixels with ${step.red}, ${step.green}, ${step.blue}`;
     case "tone":
       return `play ${step.frequency} Hz tone`;
+    case "tone-stop":
+      return `stop active tone on ${step.componentId}`;
     case "relay-write":
       return `set relay to ${step.value}`;
     case "read-analog-serial":

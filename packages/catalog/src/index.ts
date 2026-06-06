@@ -362,6 +362,11 @@ export const components: ComponentDefinition[] = [
 
 export const blocks: BlockDefinition[] = [
   { id: "digital-write", label: "set digital output", category: "output", kind: "digital-write", inputs: [], description: "Turn a digital output on or off." },
+  { id: "digital-toggle", label: "toggle digital output", category: "output", kind: "digital-toggle", inputs: [], description: "Flip a pin between HIGH and LOW each time the block runs." },
+  { id: "if-pin", label: "if digital input", category: "logic", kind: "if-pin", inputs: [], description: "Run steps only when the selected pin matches a value." },
+  { id: "if-pin-else", label: "if/else digital input", category: "logic", kind: "if-pin-else", inputs: [], description: "Run one branch when a pin matches and the other branch otherwise." },
+  { id: "repeat", label: "repeat block", category: "timing", kind: "repeat", inputs: [], description: "Run steps repeatedly a set number of times." },
+  { id: "while-pin", label: "while pin is state", category: "logic", kind: "while-pin", inputs: [], description: "Loop while a selected pin stays high or low." },
   { id: "analog-write", label: "set PWM output", category: "output", kind: "analog-write", inputs: [], description: "Write a PWM value to a pin." },
   { id: "digital-read", label: "print digital pin", category: "input", kind: "read-digital-serial", inputs: [], description: "Read a digital pin and print the value." },
   { id: "analog-read", label: "print analog pin", category: "input", kind: "read-analog-serial", inputs: [], description: "Read an analog pin and print the value." },
@@ -378,6 +383,7 @@ export const blocks: BlockDefinition[] = [
   { id: "oled-print", label: "OLED text", category: "display", kind: "oled-print", inputs: [], description: "Write text to an OLED." },
   { id: "neopixel-fill", label: "NeoPixel color", category: "output", kind: "neopixel-fill", inputs: [], description: "Fill a NeoPixel strip." },
   { id: "tone", label: "play tone", category: "output", kind: "tone", inputs: [], description: "Play a buzzer tone." },
+  { id: "tone-stop", label: "stop tone", category: "output", kind: "tone-stop", inputs: [], description: "Stop any active buzzer tone." },
   { id: "relay-write", label: "set relay", category: "output", kind: "relay-write", inputs: [], description: "Switch a relay module." },
   { id: "read-analog-serial", label: "print analog sensor", category: "input", kind: "read-analog-serial", inputs: [], description: "Read an analog component and print it." },
   { id: "read-digital-serial", label: "print digital sensor", category: "input", kind: "read-digital-serial", inputs: [], description: "Read a digital component and print it." },

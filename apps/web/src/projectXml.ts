@@ -12,6 +12,11 @@ function field(name: string, value: string | number | boolean | undefined): stri
   return `<field name="${name}">${escapeXml(String(value ?? ""))}</field>`;
 }
 
+function statementChain(steps: string[]): string {
+  if (steps.length === 0) return "";
+  return chain(steps).trim();
+}
+
 function blockForStep(step: ProgramStep): string {
   switch (step.kind) {
     case "digital-write":
@@ -24,10 +29,18 @@ function blockForStep(step: ProgramStep): string {
       return `<block type="abl_analog_write_pin">${field("PIN", step.pin)}${field("VALUE", step.value)}</block>`;
     case "digital-if-write":
       return `<block type="abl_digital_if_write">${field("INPUT_PIN", step.inputPin)}${field("EXPECTED", step.expectedValue)}${field("OUTPUT_PIN", step.outputPin)}${field("OUTPUT_VALUE", step.outputValue)}</block>`;
+    case "if-pin":
+      return `<block type="abl_if_digital">${field("PIN", step.pin)}${field("EXPECTED", step.expectedValue)}<statement name="DO">${statementChain(step.then.map(blockForStep))}</statement></block>`;
+    case "if-pin-else":
+      return `<block type="abl_if_else_digital">${field("PIN", step.pin)}${field("EXPECTED", step.expectedValue)}<statement name="DO">${statementChain(step.then.map(blockForStep))}</statement><statement name="ELSE">${statementChain(step.else?.map(blockForStep) ?? [])}</statement></block>`;
+    case "while-pin":
+      return `<block type="abl_while_digital">${field("PIN", step.pin)}${field("EXPECTED", step.expectedValue)}<statement name="BODY">${statementChain(step.body.map(blockForStep))}</statement></block>`;
     case "delay-microseconds":
       return `<block type="abl_delay_microseconds">${field("MICROSECONDS", step.us)}</block>`;
     case "delay":
       return `<block type="abl_delay">${field("MS", step.ms)}</block>`;
+    case "repeat":
+      return `<block type="abl_repeat">${field("COUNT", step.count)}<statement name="DO">${statementChain(step.body.map(blockForStep))}</statement></block>`;
     case "serial-print":
       return `<block type="abl_serial_print">${field("VALUE", step.value)}${field("NEWLINE", step.newline === false ? "false" : "true")}</block>`;
     case "button-controls-led":
@@ -50,6 +63,8 @@ function blockForStep(step: ProgramStep): string {
       return `<block type="abl_neopixel_color">${field("STRIP", step.componentId)}${field("RED", step.red)}${field("GREEN", step.green)}${field("BLUE", step.blue)}</block>`;
     case "tone":
       return `<block type="abl_buzzer_tone">${field("BUZZER", step.componentId)}${field("FREQUENCY", step.frequency)}${field("DURATION", step.duration ?? 250)}</block>`;
+    case "tone-stop":
+      return `<block type="abl_tone_stop">${field("BUZZER", step.componentId)}</block>`;
     case "relay-write":
       return `<block type="abl_relay_write">${field("RELAY", step.componentId)}${field("STATE", step.value === "LOW" || step.value === false ? "LOW" : "HIGH")}</block>`;
     case "read-analog-serial":
@@ -62,6 +77,10 @@ function blockForStep(step: ProgramStep): string {
         : `<block type="abl_digital_read_pin">${field("PIN", step.pin)}${field("LABEL", step.label ?? "digital")}</block>`;
     case "ir-read-serial":
       return `<block type="abl_ir_serial">${field("SENSOR", step.componentId)}</block>`;
+    case "digital-toggle":
+      return step.pin === 13
+        ? `<block type="abl_builtin_led_toggle"></block>`
+        : `<block type="abl_digital_toggle">${field("PIN", step.pin)}</block>`;
     default:
       return `<block type="abl_delay">${field("MS", 250)}</block>`;
   }

@@ -73,6 +73,49 @@ function blockToSteps(block: Blockly.Block, components: ComponentInstance[]): Pr
           outputValue: value(block, "OUTPUT_VALUE") === "LOW" ? "LOW" : "HIGH"
         }
       ];
+    case "abl_builtin_led_toggle":
+      return [{ kind: "digital-toggle", pin: 13 }];
+    case "abl_digital_toggle":
+      return [{ kind: "digital-toggle", pin: pinValue(block, "PIN", 13) }];
+    case "abl_if_digital": {
+      const pin = pinValue(block, "PIN", 2);
+      return [{
+        kind: "if-pin",
+        pin,
+        expectedValue: value(block, "EXPECTED") === "LOW" ? "LOW" : "HIGH",
+        then: stepsFromInput(block.getInput("DO")?.connection?.targetBlock() ?? null, components)
+      }];
+    }
+    case "abl_if_else_digital": {
+      return [
+        {
+          kind: "if-pin-else",
+          pin: pinValue(block, "PIN", 2),
+          expectedValue: value(block, "EXPECTED") === "LOW" ? "LOW" : "HIGH",
+          then: stepsFromInput(block.getInput("DO")?.connection?.targetBlock() ?? null, components),
+          else: stepsFromInput(block.getInput("ELSE")?.connection?.targetBlock() ?? null, components)
+        }
+      ];
+    }
+    case "abl_while_digital": {
+      const pin = pinValue(block, "PIN", 2);
+      return [
+        {
+          kind: "while-pin",
+          pin,
+          expectedValue: value(block, "EXPECTED") === "LOW" ? "LOW" : "HIGH",
+          body: stepsFromInput(block.getInput("BODY")?.connection?.targetBlock() ?? null, components)
+        }
+      ];
+    }
+    case "abl_repeat":
+      return [
+        {
+          kind: "repeat",
+          count: numberValue(block, "COUNT", 3),
+          body: stepsFromInput(block.getInput("DO")?.connection?.targetBlock() ?? null, components)
+        }
+      ];
     case "abl_delay_microseconds":
       return [{ kind: "delay-microseconds", us: numberValue(block, "MICROSECONDS", 500) }];
     case "abl_button_led": {
@@ -141,6 +184,10 @@ function blockToSteps(block: Blockly.Block, components: ComponentInstance[]): Pr
         ? [{ kind: "tone", componentId, frequency: numberValue(block, "FREQUENCY", 440), duration: numberValue(block, "DURATION", 250) }]
         : [];
     }
+    case "abl_tone_stop": {
+      const componentId = value(block, "BUZZER");
+      return validComponent(componentId, components) ? [{ kind: "tone-stop", componentId }] : [];
+    }
     case "abl_relay_write": {
       const componentId = value(block, "RELAY");
       return validComponent(componentId, components) ? [{ kind: "relay-write", componentId, value: value(block, "STATE") as "HIGH" | "LOW" }] : [];
@@ -191,11 +238,23 @@ export function workspaceToProgram(workspace: Blockly.WorkspaceSvg, components: 
   const steps: ProgramStep[] = [];
   const topBlocks = workspace.getTopBlocks(true);
   for (const topBlock of topBlocks) {
-    let cursor: Blockly.Block | null = topBlock;
-    while (cursor) {
-      steps.push(...blockToSteps(cursor, components));
-      cursor = cursor.getNextBlock();
-    }
+    steps.push(...stepsFromBlock(topBlock, components));
+  }
+  return steps;
+}
+
+function stepsFromInput(start: Blockly.Block | null, components: ComponentInstance[]): ProgramStep[] {
+  if (!start) return [];
+  return stepsFromBlock(start, components);
+}
+
+function stepsFromBlock(start: Blockly.Block | null, components: ComponentInstance[]): ProgramStep[] {
+  const steps: ProgramStep[] = [];
+  let cursor: Blockly.Block | null = start;
+  while (cursor) {
+    const current = blockToSteps(cursor, components);
+    steps.push(...current);
+    cursor = cursor.getNextBlock();
   }
   return steps;
 }

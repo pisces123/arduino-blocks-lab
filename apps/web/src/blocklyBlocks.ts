@@ -13,6 +13,7 @@ const blockColours = {
   sensors: "#12a988",
   motion: "#4f86f7",
   displays: "#8f5cf7",
+  logic: "#ff9f43",
   timing: "#78a841",
   serial: "#f6a31e"
 };
@@ -50,6 +51,19 @@ export const toolbox: StyledToolbox = {
   contents: [
     {
       kind: "category",
+      name: "Logic",
+      colour: blockColours.logic,
+      cssConfig: categoryCss("logic"),
+      contents: [
+        { kind: "block", type: "abl_if_digital" },
+        { kind: "block", type: "abl_if_else_digital" },
+        { kind: "block", type: "abl_while_digital" },
+        { kind: "block", type: "abl_repeat" },
+        { kind: "block", type: "abl_builtin_led_toggle" }
+      ]
+    },
+    {
+      kind: "category",
       name: "Input / Output",
       colour: blockColours.io,
       cssConfig: categoryCss("io"),
@@ -58,10 +72,12 @@ export const toolbox: StyledToolbox = {
         { kind: "block", type: "abl_digital_write_pin" },
         { kind: "block", type: "abl_analog_write_pin" },
         { kind: "block", type: "abl_builtin_led_write" },
+        { kind: "block", type: "abl_digital_toggle" },
         { kind: "block", type: "abl_digital_if_write" },
         { kind: "block", type: "abl_pin_mode" },
         { kind: "block", type: "abl_relay_write" },
         { kind: "block", type: "abl_buzzer_tone" },
+        { kind: "block", type: "abl_tone_stop" },
         { kind: "block", type: "abl_rgb_color" },
         { kind: "block", type: "abl_neopixel_color" }
       ]
@@ -227,6 +243,99 @@ export function registerArduinoBlocks() {
     }
   };
 
+  Blockly.Blocks.abl_builtin_led_toggle = {
+    init() {
+      this.appendDummyInput()
+        .appendField("toggle built-in LED")
+        .appendField("each time this block runs");
+      statement(this, blockColours.logic);
+    }
+  };
+
+  Blockly.Blocks.abl_digital_toggle = {
+    init() {
+      this.appendDummyInput()
+        .appendField("toggle pin")
+        .appendField(pinField("13"), "PIN")
+        .appendField("each time this block runs");
+      statement(this, blockColours.io);
+    }
+  };
+
+  Blockly.Blocks.abl_if_digital = {
+    init() {
+      this.appendDummyInput()
+        .appendField("if")
+        .appendField(pinField("2"), "PIN")
+        .appendField("is")
+        .appendField(new Blockly.FieldDropdown([ ["high", "HIGH"], ["low", "LOW"] ]), "EXPECTED")
+        .appendField("then")
+        .appendField("do");
+      this.appendStatementInput("DO").setCheck(null);
+      this.appendDummyInput().appendField("end if");
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setColour(blockColours.logic);
+      this.setTooltip("");
+      this.setHelpUrl("");
+    }
+  };
+
+  Blockly.Blocks.abl_if_else_digital = {
+    init() {
+      this.appendDummyInput()
+        .appendField("if")
+        .appendField(pinField("2"), "PIN")
+        .appendField("is")
+        .appendField(new Blockly.FieldDropdown([ ["high", "HIGH"], ["low", "LOW"] ]), "EXPECTED")
+        .appendField("then");
+      this.appendStatementInput("DO").setCheck(null);
+      this.appendDummyInput().appendField("else");
+      this.appendStatementInput("ELSE").setCheck(null);
+      this.appendDummyInput().appendField("end if");
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setColour(blockColours.logic);
+      this.setTooltip("");
+      this.setHelpUrl("");
+    }
+  };
+
+  Blockly.Blocks.abl_while_digital = {
+    init() {
+      this.appendDummyInput()
+        .appendField("while")
+        .appendField(pinField("2"), "PIN")
+        .appendField("is")
+        .appendField(new Blockly.FieldDropdown([ ["high", "HIGH"], ["low", "LOW"] ]), "EXPECTED")
+        .appendField("do");
+      this.appendStatementInput("BODY").setCheck(null);
+      this.appendDummyInput().appendField("repeat");
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setColour(blockColours.logic);
+      this.setTooltip("");
+      this.setHelpUrl("");
+    }
+  };
+
+  Blockly.Blocks.abl_repeat = {
+    init() {
+      this.appendDummyInput()
+        .appendField("repeat")
+        .appendField(numberField(3, 1, 999), "COUNT")
+        .appendField("times")
+        .appendField("do");
+      this.appendStatementInput("DO").setCheck(null);
+      this.appendDummyInput().appendField("end repeat");
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setColour(blockColours.logic);
+      this.setTooltip("");
+      this.setHelpUrl("");
+    }
+  };
+
   Blockly.Blocks.abl_pin_mode = {
     init() {
       this.appendDummyInput()
@@ -299,6 +408,15 @@ export function registerArduinoBlocks() {
         .appendField("Hz for")
         .appendField(numberField(250, 1, 10000), "DURATION")
         .appendField("ms");
+      statement(this, blockColours.io);
+    }
+  };
+
+  Blockly.Blocks.abl_tone_stop = {
+    init() {
+      this.appendDummyInput()
+        .appendField("stop tone on")
+        .appendField(new Blockly.FieldDropdown(() => componentOptions(["buzzer"])), "BUZZER");
       statement(this, blockColours.io);
     }
   };

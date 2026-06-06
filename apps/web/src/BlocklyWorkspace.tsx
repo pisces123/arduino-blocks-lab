@@ -69,6 +69,20 @@ export default function BlocklyWorkspace({ components, componentDefinitions, xml
   componentsRef.current = components;
   componentDefinitionsRef.current = componentDefinitions;
 
+  function syncProjectFromWorkspace(workspace: Blockly.WorkspaceSvg) {
+    if (loadingRef.current) return;
+    try {
+      const dom = Blockly.Xml.workspaceToDom(workspace);
+      const blocksXml = Blockly.Xml.domToText(dom);
+      const nextProgram = workspaceToProgram(workspace, componentsRef.current);
+      onChange(nextProgram, blocksXml);
+      setWorkspaceError(null);
+    } catch (error) {
+      console.error("Unable to sync workspace changes", error);
+      setWorkspaceError("Blockly sync failed for this change. The workspace will keep running, but code generation may pause until recovered.");
+    }
+  }
+
   useEffect(() => {
     setBlocklyComponentProvider(() => componentsRef.current);
     setBlocklyComponentDefinitionProvider(() => componentDefinitionsRef.current);
@@ -99,13 +113,7 @@ export default function BlocklyWorkspace({ components, componentDefinitions, xml
       workspaceRef.current = workspace;
       const listener = (event: Blockly.Events.Abstract) => {
         if (loadingRef.current || event.isUiEvent) return;
-        try {
-          const dom = Blockly.Xml.workspaceToDom(workspace);
-          const blocksXml = Blockly.Xml.domToText(dom);
-          onChange(workspaceToProgram(workspace, componentsRef.current), blocksXml);
-        } catch (error) {
-          console.error("Unable to sync workspace changes", error);
-        }
+        syncProjectFromWorkspace(workspace);
       };
       workspace.addChangeListener(listener);
       setWorkspaceError(null);
@@ -130,11 +138,12 @@ export default function BlocklyWorkspace({ components, componentDefinitions, xml
     try {
       const dom = Blockly.utils.xml.textToDom(sanitizeBlocklyXml(xml));
       Blockly.Xml.domToWorkspace(dom, workspace);
-      onChange(workspaceToProgram(workspace, componentsRef.current), Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace)));
+      syncProjectFromWorkspace(workspace);
     } catch (error) {
       console.error("Failed to load Blockly XML. Falling back to empty canvas.", error);
       workspace.clear();
-      onChange([], emptyBlocklyXml);
+      syncProjectFromWorkspace(workspace);
+      setWorkspaceError("Loaded an older/invalid blocks XML. Your project was restored as an empty workspace.");
     } finally {
       loadingRef.current = false;
     }
@@ -148,20 +157,6 @@ export default function BlocklyWorkspace({ components, componentDefinitions, xml
     workspaceRef.current?.setTheme(blocklyThemeFor(themePreference));
   }, [themePreference]);
 
-  if (workspaceError) {
-    return (
-      <section className="block-studio block-studio-error" aria-live="polite">
-        <div className="block-studio-header">
-          <div>
-            <span>Blockly</span>
-            <strong>Workspace temporarily unavailable</strong>
-          </div>
-        </div>
-        <div className="block-studio-canvas blockly-workspace-error">{workspaceError}</div>
-      </section>
-    );
-  }
-
   return (
     <div className="block-studio">
       <div className="block-studio-header">
@@ -170,6 +165,7 @@ export default function BlocklyWorkspace({ components, componentDefinitions, xml
           <strong>Arduino canvas</strong>
         </div>
         <div className="block-studio-pills" aria-label="Block editor status">
+          {workspaceError ? <span className="block-studio-warning">{workspaceError}</span> : null}
           <span>{components.length} part{components.length === 1 ? "" : "s"}</span>
           <span>{componentDefinitions.length} catalog items</span>
         </div>

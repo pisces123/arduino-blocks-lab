@@ -6,6 +6,7 @@ describe("Blockly toolbox", () => {
     const categories = toolbox.contents;
 
     expect(categories.map((category) => category.name)).toEqual([
+      "Logic",
       "Input / Output",
       "Sensors",
       "Motion",

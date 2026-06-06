@@ -1772,6 +1772,12 @@ button:disabled {
   white-space: nowrap;
 }
 
+.block-studio-warning {
+  border-color: color-mix(in srgb, var(--coral) 78%, transparent);
+  background: color-mix(in srgb, var(--coral) 12%, var(--soft-blue));
+  color: var(--heading);
+}
+
 .block-studio-error {
   background: var(--panel);
 }

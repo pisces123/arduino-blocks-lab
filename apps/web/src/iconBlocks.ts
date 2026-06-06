@@ -248,6 +248,41 @@ export function createIconBlockCards(program: ProgramStep[], components: Compone
           detail: `${componentName(components, step.componentId)} to ${step.angle}`,
           tone: "motion"
         };
+      case "digital-toggle":
+        return {
+          id: `${index}-${step.kind}`,
+          title: "Toggle",
+          detail: `pin ${step.pin}`,
+          tone: "output"
+        };
+      case "if-pin":
+        return {
+          id: `${index}-${step.kind}`,
+          title: "If",
+          detail: `pin ${step.pin}`,
+          tone: "input"
+        };
+      case "if-pin-else":
+        return {
+          id: `${index}-${step.kind}`,
+          title: "If / Else",
+          detail: `pin ${step.pin}`,
+          tone: "input"
+        };
+      case "repeat":
+        return {
+          id: `${index}-${step.kind}`,
+          title: "Repeat",
+          detail: `${step.count}x`,
+          tone: "time"
+        };
+      case "while-pin":
+        return {
+          id: `${index}-${step.kind}`,
+          title: "While",
+          detail: `pin ${step.pin}`,
+          tone: "time"
+        };
       case "ultrasonic-serial":
       case "dht-serial":
       case "read-analog-serial":
