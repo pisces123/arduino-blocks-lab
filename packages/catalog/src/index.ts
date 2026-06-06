@@ -363,7 +363,10 @@ export const components: ComponentDefinition[] = [
 export const blocks: BlockDefinition[] = [
   { id: "digital-write", label: "set digital output", category: "output", kind: "digital-write", inputs: [], description: "Turn a digital output on or off." },
   { id: "analog-write", label: "set PWM output", category: "output", kind: "analog-write", inputs: [], description: "Write a PWM value to a pin." },
+  { id: "digital-read", label: "print digital pin", category: "input", kind: "read-digital-serial", inputs: [], description: "Read a digital pin and print the value." },
+  { id: "analog-read", label: "print analog pin", category: "input", kind: "read-analog-serial", inputs: [], description: "Read an analog pin and print the value." },
   { id: "delay", label: "wait", category: "timing", kind: "delay", inputs: [], description: "Pause the program." },
+  { id: "delay-microseconds", label: "wait microseconds", category: "timing", kind: "delay-microseconds", inputs: [], description: "Pause for a short microsecond interval." },
   { id: "serial-print", label: "print", category: "serial", kind: "serial-print", inputs: [], description: "Print to the serial monitor." },
   { id: "button-controls-led", label: "button controls LED", category: "logic", kind: "button-controls-led", inputs: [], description: "Use a button to switch an LED." },
   { id: "potentiometer-controls-servo", label: "knob controls servo", category: "motion", kind: "potentiometer-controls-servo", inputs: [], description: "Map a knob to a servo angle." },

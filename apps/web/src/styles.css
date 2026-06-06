@@ -74,12 +74,23 @@ html[data-theme="dark"] {
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  height: 100%;
+}
+
+html {
+  overflow: hidden;
+}
+
 body {
   margin: 0;
   min-width: 0;
   min-height: 100vh;
   background: var(--page-wash);
   color: var(--ink);
+  overflow: hidden;
 }
 
 .app-crash-shell {
@@ -148,6 +159,8 @@ body {
 
 .landing-shell {
   min-height: 100vh;
+  height: 100%;
+  overflow: auto;
   overflow-x: hidden;
   background:
     linear-gradient(180deg, rgba(255, 254, 253, 0.88), rgba(223, 245, 255, 0.94) 68%, rgba(255, 254, 253, 0.98)),
@@ -692,9 +705,10 @@ button:disabled {
 }
 
 .app-shell {
-  height: 100vh;
+  height: 100%;
   display: grid;
   grid-template-rows: auto auto 1fr;
+  overflow: hidden;
 }
 
 .topbar {
@@ -886,6 +900,7 @@ button:disabled {
   grid-template-columns: minmax(240px, 280px) minmax(0, 1fr) minmax(290px, 330px);
   gap: 14px;
   padding: 14px;
+  overflow: hidden;
 }
 
 .workspace-grid.mode-blocks.style-word {
@@ -934,6 +949,7 @@ button:disabled {
 .panel-section,
 .main-panel {
   min-height: 0;
+  height: 100%;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
@@ -945,7 +961,7 @@ button:disabled {
   flex-direction: column;
   gap: 10px;
   padding: 12px;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .section-heading {
@@ -1686,7 +1702,7 @@ button:disabled {
 
 .main-panel {
   min-width: 0;
-  overflow: hidden;
+  overflow: auto;
   position: relative;
 }
 
@@ -1754,6 +1770,21 @@ button:disabled {
   background: color-mix(in srgb, var(--soft-blue) 72%, var(--field));
   color: var(--heading);
   white-space: nowrap;
+}
+
+.block-studio-error {
+  background: var(--panel);
+}
+
+.blockly-workspace-error {
+  padding: 14px;
+  color: var(--coral-ink);
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  text-align: center;
 }
 
 .block-studio-canvas {
@@ -5546,8 +5577,8 @@ html[data-theme="dark"] .breadboard-model {
   }
 
   .app-shell {
-    height: auto;
-    min-height: 100vh;
+    height: 100%;
+    min-height: 0;
   }
 
   .app-shell > * {

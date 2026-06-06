@@ -35,7 +35,7 @@ describe("lesson guide", () => {
 
   it("labels lesson levels and actions for the UI", () => {
     expect(lessonLevelLabel("icon")).toBe("Icon blocks");
-    expect(lessonLevelLabel("word")).toBe("Word blocks");
+    expect(lessonLevelLabel("word")).toBe("Blocks");
     expect(lessonLevelLabel("text")).toBe("Arduino C++");
     expect(lessonActionLabel("upload")).toBe("Upload");
     expect(lessonActionLabel(undefined)).toBe("Step");

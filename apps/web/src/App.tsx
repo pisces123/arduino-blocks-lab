@@ -135,7 +135,7 @@ const projectStyleOptions: Array<{
   },
   {
     id: "word",
-    title: "Word Blocks",
+    title: "Blocks",
     kicker: "scratch-style",
     detail: "Build with full Blockly blocks and live Arduino C++."
   },
@@ -666,7 +666,7 @@ export default function App() {
           : `${wiringCanvas.summary.total} ready`;
   const activeStyleOption = projectStyleOptions.find((option) => option.id === projectStyle) ?? {
     id: "word",
-    title: "Word Blocks",
+    title: "Blocks",
     kicker: "scratch-style",
     detail: "Build with full Blockly blocks and live Arduino C++."
   };
@@ -867,7 +867,7 @@ export default function App() {
     setReloadKey(crypto.randomUUID());
     applyProjectStyle(newProjectStyle);
     setNewProjectOpen(false);
-    setAgentLog((current) => [`Created Project 1 in ${projectStyleOptions.find((option) => option.id === newProjectStyle)?.title ?? "Word Blocks"}.`, ...current]);
+    setAgentLog((current) => [`Created Project 1 in ${projectStyleOptions.find((option) => option.id === newProjectStyle)?.title ?? "Blocks"}.`, ...current]);
   }
 
   function loadIdeaProject(idea: ProjectIdea) {
@@ -1486,7 +1486,7 @@ export default function App() {
               title={option.title}
             >
               {option.id === "code" ? <Code2 size={15} /> : <SquareStack size={15} />}
-              <span>{option.id === "icon" ? "Icon" : option.id === "word" ? "Word" : "Code"}</span>
+              <span>{option.id === "icon" ? "Icon" : option.id === "word" ? "Blocks" : "Code"}</span>
             </button>
           ))}
         </div>

@@ -101,7 +101,7 @@ export default function LandingPage({ boardCount, componentCount, lessonCount, o
         <div className="landing-entry-grid">
           <button onClick={onStart}>
             <SquareStack size={22} />
-            <strong>Word Blocks</strong>
+            <strong>Blocks</strong>
             <span>Build starter programs with colorful Arduino blocks.</span>
           </button>
           <button onClick={onOpenCode}>
