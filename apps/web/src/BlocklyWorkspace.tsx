@@ -14,11 +14,55 @@ type Props = {
   onChange: (program: ProgramStep[], blocksXml: string) => void;
 };
 
+const toolboxChrome: Record<string, { shortLabel: string; color: string }> = {
+  "Input/Output": { shortLabel: "I/O", color: "#ef3e7a" },
+  Sensors: { shortLabel: "S", color: "#12a988" },
+  Motion: { shortLabel: "M", color: "#4f86f7" },
+  Displays: { shortLabel: "LCD", color: "#8f5cf7" },
+  Timing: { shortLabel: "ms", color: "#78a841" },
+  Output: { shortLabel: "O", color: "#ef3e7a" },
+  Input: { shortLabel: "I", color: "#12a988" },
+  Display: { shortLabel: "D", color: "#8f5cf7" }
+};
+
+function polishToolbox(container: HTMLDivElement | null) {
+  const toolboxDiv = container?.querySelector(".blocklyToolbox, .blocklyToolboxDiv");
+  if (!toolboxDiv) return;
+
+  const modernRows = toolboxDiv.querySelectorAll<HTMLElement>(".blocklyToolboxCategory");
+  modernRows.forEach((row) => {
+    const label = row.querySelector<HTMLElement>(".blocklyToolboxCategoryLabel")?.textContent?.trim();
+    if (!label) return;
+    const chrome = toolboxChrome[label] ?? { shortLabel: label.slice(0, 2).toUpperCase(), color: "#14a8e0" };
+    row.dataset.ablCategory = label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    row.style.setProperty("--abl-category-color", chrome.color);
+    const icon = row.querySelector<HTMLElement>(".blocklyToolboxCategoryIcon");
+    if (!icon) return;
+    icon.classList.add("abl-toolbox-icon");
+    icon.textContent = chrome.shortLabel;
+    icon.style.setProperty("--abl-category-color", chrome.color);
+    icon.setAttribute("aria-hidden", "true");
+  });
+
+  toolboxDiv.querySelectorAll<HTMLElement>(".blocklyTreeRow").forEach((row) => {
+    const label = row.querySelector<HTMLElement>(".blocklyTreeLabel")?.textContent?.trim();
+    if (!label || row.querySelector(".abl-toolbox-icon")) return;
+    const chrome = toolboxChrome[label] ?? { shortLabel: label.slice(0, 2).toUpperCase(), color: "#14a8e0" };
+    row.dataset.ablCategory = label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    row.style.setProperty("--abl-category-color", chrome.color);
+    const icon = document.createElement("span");
+    icon.className = "abl-toolbox-icon";
+    icon.textContent = chrome.shortLabel;
+    icon.setAttribute("aria-hidden", "true");
+    row.insertBefore(icon, row.firstChild);
+  });
+}
+
 const lightBlocklyTheme = Blockly.Theme.defineTheme("ablLight", {
   name: "ablLight",
   base: Blockly.Themes.Zelos,
   componentStyles: {
-    workspaceBackgroundColour: "#f5fbff",
+    workspaceBackgroundColour: "#fbfdff",
     toolboxBackgroundColour: "#fffefd",
     toolboxForegroundColour: "#193142",
     flyoutBackgroundColour: "#fffefd",
@@ -67,21 +111,29 @@ export default function BlocklyWorkspace({ components, componentDefinitions, xml
     setBlocklyComponentDefinitionProvider(() => componentDefinitionsRef.current);
     registerArduinoBlocks();
     if (!containerRef.current) return;
+    const compactWorkspace = window.matchMedia("(max-width: 620px)").matches;
     const workspace = Blockly.inject(containerRef.current, {
       toolbox,
       trashcan: true,
       scrollbars: true,
       theme: blocklyThemeFor(themePreference),
+      grid: {
+        spacing: 24,
+        length: 2,
+        colour: themePreference === "dark" ? "#335875" : "#cddfe9",
+        snap: false
+      },
       zoom: {
         controls: true,
         wheel: true,
-        startScale: 0.92,
+        startScale: compactWorkspace ? 0.6 : 0.92,
         maxScale: 1.6,
         minScale: 0.45
       },
       renderer: "zelos"
     });
     workspaceRef.current = workspace;
+    window.requestAnimationFrame(() => polishToolbox(containerRef.current));
     const listener = (event: Blockly.Events.Abstract) => {
       if (loadingRef.current || event.isUiEvent) return;
       const dom = Blockly.Xml.workspaceToDom(workspace);
@@ -112,11 +164,28 @@ export default function BlocklyWorkspace({ components, componentDefinitions, xml
 
   useEffect(() => {
     workspaceRef.current?.refreshToolboxSelection();
+    window.requestAnimationFrame(() => polishToolbox(containerRef.current));
   }, [components, componentDefinitions]);
 
   useEffect(() => {
     workspaceRef.current?.setTheme(blocklyThemeFor(themePreference));
   }, [themePreference]);
 
-  return <div className="blockly-host" ref={containerRef} />;
+  return (
+    <div className="block-studio">
+      <div className="block-studio-header">
+        <div>
+          <span>Word Blocks</span>
+          <strong>Arduino canvas</strong>
+        </div>
+        <div className="block-studio-pills" aria-label="Block editor status">
+          <span>{components.length} part{components.length === 1 ? "" : "s"}</span>
+          <span>{componentDefinitions.length} catalog items</span>
+        </div>
+      </div>
+      <div className="block-studio-canvas">
+        <div className="blockly-host" ref={containerRef} />
+      </div>
+    </div>
+  );
 }

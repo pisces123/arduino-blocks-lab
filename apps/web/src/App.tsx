@@ -1475,7 +1475,7 @@ export default function App() {
         ))}
       </section>
 
-      <div className="workspace-grid">
+      <div className={`workspace-grid mode-${mode} style-${projectStyle}`}>
         <aside className="left-panel">
           <section className="panel-section idea-section">
             <div className="section-heading">
@@ -1909,6 +1909,42 @@ export default function App() {
         </section>
 
         <aside className="right-panel">
+          {mode === "blocks" && (
+            <section className="panel-section launchpad-panel">
+              <button className="launchpad-help" onClick={() => setMode("lessons")}>
+                <span className="launchpad-play">
+                  <Play size={17} />
+                </span>
+                <span>
+                  <strong>New to Arduino Blocks?</strong>
+                  <small>Open the first guided build and make the board do something real.</small>
+                </span>
+              </button>
+              <div className="example-heading">
+                <strong>Example projects</strong>
+                <span>{starterCards.length}</span>
+              </div>
+              <div className="example-project-list">
+                {starterCards.slice(0, 6).map((starter, index) => {
+                  const active = project.name === starter.project.name;
+                  return (
+                    <button
+                      className={`example-project-card ${active ? "active" : ""}`}
+                      key={`example-${starter.id}`}
+                      onClick={() => loadProject(starter.project)}
+                    >
+                      <span className="example-swatch">{index + 1}</span>
+                      <span>
+                        <strong>{starter.project.name}</strong>
+                        <small>{starter.goal}</small>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
           <section className="panel-section coach-panel">
             <div className="section-heading">
               <h2>{projectCoach.title}</h2>

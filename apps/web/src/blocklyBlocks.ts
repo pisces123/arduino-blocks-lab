@@ -9,25 +9,36 @@ let registered = false;
 
 type Option = [string, string];
 
+const blockColours = {
+  io: "#ef3e7a",
+  sensors: "#12a988",
+  motion: "#4f86f7",
+  displays: "#8f5cf7",
+  timing: "#78a841"
+};
+
 export const toolbox = {
   kind: "categoryToolbox",
   contents: [
     {
       kind: "category",
-      name: "Output",
-      colour: "#d95f43",
+      name: "Input/Output",
+      colour: blockColours.io,
       contents: [
         { kind: "block", type: "abl_led_write" },
         { kind: "block", type: "abl_rgb_color" },
         { kind: "block", type: "abl_neopixel_color" },
         { kind: "block", type: "abl_buzzer_tone" },
-        { kind: "block", type: "abl_relay_write" }
+        { kind: "block", type: "abl_relay_write" },
+        { kind: "block", type: "abl_button_led" },
+        { kind: "block", type: "abl_analog_serial" },
+        { kind: "block", type: "abl_digital_serial" }
       ]
     },
     {
       kind: "category",
-      name: "Input",
-      colour: "#2f8f71",
+      name: "Sensors",
+      colour: blockColours.sensors,
       contents: [
         { kind: "block", type: "abl_button_led" },
         { kind: "block", type: "abl_pot_servo" },
@@ -41,13 +52,16 @@ export const toolbox = {
     {
       kind: "category",
       name: "Motion",
-      colour: "#4f7dbd",
-      contents: [{ kind: "block", type: "abl_servo_write" }]
+      colour: blockColours.motion,
+      contents: [
+        { kind: "block", type: "abl_servo_write" },
+        { kind: "block", type: "abl_pot_servo" }
+      ]
     },
     {
       kind: "category",
-      name: "Display",
-      colour: "#9a6b2f",
+      name: "Displays",
+      colour: blockColours.displays,
       contents: [
         { kind: "block", type: "abl_lcd_print" },
         { kind: "block", type: "abl_oled_print" }
@@ -56,7 +70,7 @@ export const toolbox = {
     {
       kind: "category",
       name: "Timing",
-      colour: "#616b3a",
+      colour: blockColours.timing,
       contents: [{ kind: "block", type: "abl_delay" }]
     }
   ]
@@ -115,7 +129,7 @@ export function registerArduinoBlocks() {
         .appendField(new Blockly.FieldDropdown(() => componentOptions(["led"])), "COMPONENT")
         .appendField("to")
         .appendField(new Blockly.FieldDropdown([["on", "HIGH"], ["off", "LOW"]]), "STATE");
-      statement(this, "#d95f43");
+      statement(this, blockColours.io);
     }
   };
 
@@ -130,7 +144,7 @@ export function registerArduinoBlocks() {
         .appendField(numberField(80, 0, 255), "GREEN")
         .appendField("B")
         .appendField(numberField(64, 0, 255), "BLUE");
-      statement(this, "#d95f43");
+      statement(this, blockColours.io);
     }
   };
 
@@ -145,7 +159,7 @@ export function registerArduinoBlocks() {
         .appendField(numberField(160, 0, 255), "GREEN")
         .appendField("B")
         .appendField(numberField(120, 0, 255), "BLUE");
-      statement(this, "#d95f43");
+      statement(this, blockColours.io);
     }
   };
 
@@ -158,7 +172,7 @@ export function registerArduinoBlocks() {
         .appendField("Hz for")
         .appendField(numberField(250, 1, 10000), "DURATION")
         .appendField("ms");
-      statement(this, "#d95f43");
+      statement(this, blockColours.io);
     }
   };
 
@@ -169,14 +183,14 @@ export function registerArduinoBlocks() {
         .appendField(new Blockly.FieldDropdown(() => componentOptions(["relay"])), "RELAY")
         .appendField("to")
         .appendField(new Blockly.FieldDropdown([["on", "HIGH"], ["off", "LOW"]]), "STATE");
-      statement(this, "#d95f43");
+      statement(this, blockColours.io);
     }
   };
 
   Blockly.Blocks.abl_delay = {
     init() {
       this.appendDummyInput().appendField("wait").appendField(numberField(1000, 0, 60000), "MS").appendField("ms");
-      statement(this, "#616b3a");
+      statement(this, blockColours.timing);
     }
   };
 
@@ -187,7 +201,7 @@ export function registerArduinoBlocks() {
         .appendField(new Blockly.FieldDropdown(() => componentOptions(["button"])), "BUTTON")
         .appendField("controls")
         .appendField(new Blockly.FieldDropdown(() => componentOptions(["led"])), "LED");
-      statement(this, "#2f8f71");
+      statement(this, blockColours.sensors);
     }
   };
 
@@ -198,7 +212,7 @@ export function registerArduinoBlocks() {
         .appendField(new Blockly.FieldDropdown(() => componentOptions(["potentiometer"])), "POT")
         .appendField("controls")
         .appendField(new Blockly.FieldDropdown(() => componentOptions(["servo"])), "SERVO");
-      statement(this, "#2f8f71");
+      statement(this, blockColours.motion);
     }
   };
 
@@ -207,7 +221,7 @@ export function registerArduinoBlocks() {
       this.appendDummyInput()
         .appendField("print distance from")
         .appendField(new Blockly.FieldDropdown(() => componentOptions(["ultrasonic-hcsr04"])), "SENSOR");
-      statement(this, "#2f8f71");
+      statement(this, blockColours.sensors);
     }
   };
 
@@ -216,7 +230,7 @@ export function registerArduinoBlocks() {
       this.appendDummyInput()
         .appendField("print weather from")
         .appendField(new Blockly.FieldDropdown(() => componentOptions(["dht11", "dht22"])), "SENSOR");
-      statement(this, "#2f8f71");
+      statement(this, blockColours.sensors);
     }
   };
 
@@ -230,7 +244,7 @@ export function registerArduinoBlocks() {
           ),
           "SENSOR"
         );
-      statement(this, "#2f8f71");
+      statement(this, blockColours.sensors);
     }
   };
 
@@ -244,7 +258,7 @@ export function registerArduinoBlocks() {
           ),
           "SENSOR"
         );
-      statement(this, "#2f8f71");
+      statement(this, blockColours.sensors);
     }
   };
 
@@ -253,7 +267,7 @@ export function registerArduinoBlocks() {
       this.appendDummyInput()
         .appendField("print IR code from")
         .appendField(new Blockly.FieldDropdown(() => componentOptions(["ir-receiver"])), "SENSOR");
-      statement(this, "#2f8f71");
+      statement(this, blockColours.sensors);
     }
   };
 
@@ -264,7 +278,7 @@ export function registerArduinoBlocks() {
         .appendField(new Blockly.FieldDropdown(() => componentOptions(["servo"])), "SERVO")
         .appendField("angle")
         .appendField(numberField(90, 0, 180), "ANGLE");
-      statement(this, "#4f7dbd");
+      statement(this, blockColours.motion);
     }
   };
 
@@ -275,7 +289,7 @@ export function registerArduinoBlocks() {
         .appendField(new Blockly.FieldDropdown(() => componentOptions(["lcd-1602-i2c"])), "DISPLAY")
         .appendField("print")
         .appendField(new Blockly.FieldTextInput("Hello"), "TEXT");
-      statement(this, "#9a6b2f");
+      statement(this, blockColours.displays);
     }
   };
 
@@ -286,7 +300,7 @@ export function registerArduinoBlocks() {
         .appendField(new Blockly.FieldDropdown(() => componentOptions(["oled-ssd1306"])), "DISPLAY")
         .appendField("print")
         .appendField(new Blockly.FieldTextInput("Hello"), "TEXT");
-      statement(this, "#9a6b2f");
+      statement(this, blockColours.displays);
     }
   };
 }
