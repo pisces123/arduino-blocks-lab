@@ -236,11 +236,15 @@ function flattenBoardTargets(data: unknown): BoardTarget[] {
 
 function saveBlob(filename: string, contents: string | Blob, type: string) {
   const blob = contents instanceof Blob ? contents : new Blob([contents], { type });
+  const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
+  link.href = url;
   link.download = filename;
+  link.style.display = "none";
+  document.body.append(link);
   link.click();
-  URL.revokeObjectURL(link.href);
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function coercePinValue(value: string) {
