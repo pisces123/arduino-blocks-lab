@@ -1,6 +1,20 @@
-# Arduino Blocks Lab
+<h1 align="center">Arduino Blocks Lab</h1>
 
-Open-source Arduino block coding, inspired by the friendliness of LEGO SPIKE and styled around bright Arduino blue.
+<p align="center">
+  <strong>Open-source Arduino block coding with Blockly, live Arduino C++ generation, and a local board upload agent.</strong>
+</p>
+
+<p align="center">
+  <a href="https://pisces123.github.io/arduino-blocks-lab/">Live app</a>
+  |
+  <a href="docs/agent-setup.md">Upload agent</a>
+  |
+  <a href="ROADMAP.md">Roadmap</a>
+  |
+  <a href="CONTRIBUTING.md">Contributing</a>
+</p>
+
+Arduino Blocks Lab is inspired by the friendliness of LEGO SPIKE and styled around bright Arduino blue, but it targets real Arduino hardware, transparent generated code, and classroom-ready local uploads.
 
 ## Main goal
 
