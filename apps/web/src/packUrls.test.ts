@@ -9,19 +9,19 @@ describe("normalizePackUrl", () => {
 
   it("turns GitHub blob links into raw GitHub content URLs", () => {
     expect(
-      normalizePackUrl("https://github.com/pisces123/arduino-blocks-lab/blob/main/examples/extensions/soil-moisture-pack.json")
-    ).toBe("https://raw.githubusercontent.com/pisces123/arduino-blocks-lab/main/examples/extensions/soil-moisture-pack.json");
+      normalizePackUrl("https://github.com/rupayon123/arduino-blocks-lab/blob/main/examples/extensions/soil-moisture-pack.json")
+    ).toBe("https://raw.githubusercontent.com/rupayon123/arduino-blocks-lab/main/examples/extensions/soil-moisture-pack.json");
   });
 
   it("accepts common GitHub URLs without a typed scheme", () => {
-    expect(normalizePackUrl("github.com/pisces123/arduino-blocks-lab/blob/main/examples/extensions/soil-moisture-pack.json")).toBe(
-      "https://raw.githubusercontent.com/pisces123/arduino-blocks-lab/main/examples/extensions/soil-moisture-pack.json"
+    expect(normalizePackUrl("github.com/rupayon123/arduino-blocks-lab/blob/main/examples/extensions/soil-moisture-pack.json")).toBe(
+      "https://raw.githubusercontent.com/rupayon123/arduino-blocks-lab/main/examples/extensions/soil-moisture-pack.json"
     );
   });
 
   it("resolves same-origin public pack URLs against the current app", () => {
-    expect(normalizePackUrl("packs/soil-moisture-pack.json", "https://pisces123.github.io/arduino-blocks-lab/?v=test")).toBe(
-      "https://pisces123.github.io/arduino-blocks-lab/packs/soil-moisture-pack.json"
+    expect(normalizePackUrl("packs/soil-moisture-pack.json", "https://rupayon123.github.io/arduino-blocks-lab/?v=test")).toBe(
+      "https://rupayon123.github.io/arduino-blocks-lab/packs/soil-moisture-pack.json"
     );
   });
 

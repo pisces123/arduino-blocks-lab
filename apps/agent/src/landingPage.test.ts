@@ -8,8 +8,8 @@ function status(overrides: Partial<AgentLandingStatus> = {}): AgentLandingStatus
     cliAvailable: true,
     cliDetail: "Version: 1.2.3",
     boardCount: 3,
-    webAppUrl: "https://pisces123.github.io/arduino-blocks-lab/",
-    docsUrl: "https://github.com/pisces123/arduino-blocks-lab/blob/main/docs/agent-setup.md",
+    webAppUrl: "https://rupayon123.github.io/arduino-blocks-lab/",
+    docsUrl: "https://github.com/rupayon123/arduino-blocks-lab/blob/main/docs/agent-setup.md",
     ...overrides
   };
 }

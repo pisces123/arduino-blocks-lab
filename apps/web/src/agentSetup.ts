@@ -7,10 +7,10 @@ export type AgentSetupStep = {
   command?: string;
 };
 
-const repoUrl = "https://github.com/pisces123/arduino-blocks-lab.git";
+const repoUrl = "https://github.com/rupayon123/arduino-blocks-lab.git";
 const launcherCommand = "npm run agent";
 
-export const agentSetupDocsUrl = "https://github.com/pisces123/arduino-blocks-lab/blob/main/docs/agent-setup.md";
+export const agentSetupDocsUrl = "https://github.com/rupayon123/arduino-blocks-lab/blob/main/docs/agent-setup.md";
 
 export const agentSetupPlatforms: Array<{ id: AgentSetupPlatform; label: string }> = [
   { id: "mac", label: "macOS" },

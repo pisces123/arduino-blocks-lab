@@ -39,7 +39,7 @@ If your board appears, you can return to the running web app and upload from Boa
 
 ```bash
 brew install arduino-cli
-git clone https://github.com/pisces123/arduino-blocks-lab.git
+git clone https://github.com/rupayon123/arduino-blocks-lab.git
 cd arduino-blocks-lab
 npm run agent
 ```
@@ -52,7 +52,7 @@ npm run agent
 
 ```powershell
 winget install ArduinoSA.CLI
-git clone https://github.com/pisces123/arduino-blocks-lab.git
+git clone https://github.com/rupayon123/arduino-blocks-lab.git
 cd arduino-blocks-lab
 npm run agent
 ```
@@ -66,7 +66,7 @@ npm run agent
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
-git clone https://github.com/pisces123/arduino-blocks-lab.git
+git clone https://github.com/rupayon123/arduino-blocks-lab.git
 cd arduino-blocks-lab
 sudo usermod -a -G dialout $USER
 npm run agent

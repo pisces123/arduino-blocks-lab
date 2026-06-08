@@ -46,8 +46,8 @@ describe("pack gallery", () => {
       ]
     })[0]!;
 
-    expect(resolveGalleryPackUrl(entry, "https://pisces123.github.io/arduino-blocks-lab/?v=gallery")).toBe(
-      "https://pisces123.github.io/arduino-blocks-lab/packs/soil-moisture-pack.json"
+    expect(resolveGalleryPackUrl(entry, "https://rupayon123.github.io/arduino-blocks-lab/?v=gallery")).toBe(
+      "https://rupayon123.github.io/arduino-blocks-lab/packs/soil-moisture-pack.json"
     );
   });
 

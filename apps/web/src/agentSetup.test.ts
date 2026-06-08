@@ -17,7 +17,7 @@ describe("agent setup guide", () => {
     const script = createAgentSetupScript("mac");
 
     expect(script).toContain("brew install arduino-cli");
-    expect(script).toContain("git clone https://github.com/pisces123/arduino-blocks-lab.git");
+    expect(script).toContain("git clone https://github.com/rupayon123/arduino-blocks-lab.git");
     expect(script).toContain("npm run agent");
   });
 

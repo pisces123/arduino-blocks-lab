@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://pisces123.github.io/arduino-blocks-lab/">Live app</a>
+  <a href="https://rupayon123.github.io/arduino-blocks-lab/">Live app</a>
   |
   <a href="docs/agent-setup.md">Upload agent</a>
   |
@@ -63,7 +63,7 @@ Make Arduino Blocks Lab the easiest way for students and makers to go from visua
 The web app is designed to deploy from GitHub Pages. After the first successful `main` workflow run, it will be available at:
 
 ```text
-https://pisces123.github.io/arduino-blocks-lab/
+https://rupayon123.github.io/arduino-blocks-lab/
 ```
 
 The web app can create projects and generate Arduino C++ on its own. To program real USB boards from the public site, run the local agent below.

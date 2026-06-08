@@ -15,8 +15,8 @@ import { renderAgentLandingPage } from "./landingPage";
 const execFileAsync = promisify(execFile);
 const PORT = Number(process.env.ABL_AGENT_PORT ?? 47631);
 const CLI = process.env.ARDUINO_CLI_PATH ?? "arduino-cli";
-const WEB_APP_URL = process.env.ABL_WEB_APP_URL ?? "https://pisces123.github.io/arduino-blocks-lab/";
-const SETUP_DOCS_URL = "https://github.com/pisces123/arduino-blocks-lab/blob/main/docs/agent-setup.md";
+const WEB_APP_URL = process.env.ABL_WEB_APP_URL ?? "https://rupayon123.github.io/arduino-blocks-lab/";
+const SETUP_DOCS_URL = "https://github.com/rupayon123/arduino-blocks-lab/blob/main/docs/agent-setup.md";
 
 const rpcSchema = z.object({
   method: z.string(),

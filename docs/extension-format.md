@@ -51,7 +51,7 @@ Use same-origin URLs for packs bundled with the app, or public HTTPS URLs for co
 The URL installer accepts direct JSON URLs and common GitHub links such as:
 
 ```text
-https://github.com/pisces123/arduino-blocks-lab/blob/main/examples/extensions/soil-moisture-pack.json
+https://github.com/rupayon123/arduino-blocks-lab/blob/main/examples/extensions/soil-moisture-pack.json
 ```
 
 GitHub `blob` links are converted to raw content URLs before fetching. Third-party hosts must allow browser CORS requests.
