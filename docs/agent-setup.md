@@ -35,6 +35,24 @@ arduino-cli board list
 
 If your board appears, you can return to the running web app and upload from Board → Compile/Upload.
 
+## Browser Access Safety
+
+The agent only listens on `127.0.0.1`, and browser requests are limited to trusted origins. The default allowlist is:
+
+- `https://rupayon123.github.io`
+- `http://localhost:5173`
+- `http://127.0.0.1:5173`
+- `http://localhost:4173`
+- `http://127.0.0.1:4173`
+
+Use `ABL_ALLOWED_ORIGINS` only when you intentionally host the web app somewhere else:
+
+```bash
+ABL_ALLOWED_ORIGINS="https://your-site.example,http://localhost:5173" npm run agent
+```
+
+Boards Manager package indexes must use HTTPS URLs.
+
 ## macOS
 
 ```bash

@@ -11,6 +11,7 @@ import { z } from "zod";
 import { boards } from "@abl/catalog";
 import { extractPackageIndexUrls, normalizePackageIndexUrls } from "./boardIndexes";
 import { renderAgentLandingPage } from "./landingPage";
+import { allowedOriginList, isAllowedOrigin } from "./originPolicy";
 
 const execFileAsync = promisify(execFile);
 const PORT = Number(process.env.ABL_AGENT_PORT ?? 47631);
@@ -41,23 +42,48 @@ type MonitorSession = {
 
 const app = express();
 const server = createServer(app);
-const wss = new WebSocketServer({ server, path: "/events" });
+const wss = new WebSocketServer({ noServer: true });
 const sockets = new Set<WebSocket>();
 const monitors = new Map<string, MonitorSession>();
 
-app.use((_request, response, next) => {
+app.use((request, response, next) => {
+  if (!isAllowedOrigin(request.headers.origin)) {
+    response.status(403).json({ ok: false, error: "Origin is not allowed to use the Arduino Blocks Lab agent." });
+    return;
+  }
+
   response.header("Access-Control-Allow-Private-Network", "true");
   next();
 });
 app.use(
   cors({
-    origin: true,
+    origin(origin, callback) {
+      callback(null, isAllowedOrigin(origin) ? origin ?? false : false);
+    },
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type"],
     credentials: false
   })
 );
 app.use(express.json({ limit: "2mb" }));
+
+server.on("upgrade", (request, socket, head) => {
+  const requestUrl = new URL(request.url ?? "/", `http://${request.headers.host ?? "127.0.0.1"}`);
+  if (requestUrl.pathname !== "/events") {
+    socket.destroy();
+    return;
+  }
+
+  if (!isAllowedOrigin(request.headers.origin)) {
+    socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
+    socket.destroy();
+    return;
+  }
+
+  wss.handleUpgrade(request, socket, head, (webSocket) => {
+    wss.emit("connection", webSocket, request);
+  });
+});
 
 function broadcast(payload: unknown) {
   const message = JSON.stringify(payload);
@@ -256,7 +282,7 @@ async function handleRpc(method: string, params: Record<string, unknown> = {}): 
 }
 
 app.get("/health", (_request, response) => {
-  response.json({ ok: true, port: PORT, cli: CLI });
+  response.json({ ok: true, port: PORT, cli: CLI, allowedOrigins: allowedOriginList() });
 });
 
 app.get("/", async (_request, response) => {

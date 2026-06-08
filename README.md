@@ -88,6 +88,16 @@ The launcher installs missing npm packages on first run, checks for Arduino CLI,
 
 More setup detail is in `docs/agent-setup.md`.
 
+## Local agent safety
+
+The upload agent binds to `127.0.0.1` only and rejects browser requests from unknown origins. By default, only the public app at `https://rupayon123.github.io` plus local Vite preview/dev origins can call compile, upload, package-index, or serial endpoints. Boards Manager package indexes are restricted to HTTPS URLs.
+
+If you intentionally host your own copy of the web app, start the agent with an explicit allowlist:
+
+```bash
+ABL_ALLOWED_ORIGINS="https://your-site.example,http://localhost:5173" npm run agent
+```
+
 ## Real-device readiness check
 
 This repository is already wired for actual upload testing. The blocker is your machine setup, not the web flow.

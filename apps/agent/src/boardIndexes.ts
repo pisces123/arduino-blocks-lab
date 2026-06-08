@@ -13,7 +13,7 @@ export function normalizePackageIndexUrls(input: unknown): string[] {
     } catch {
       throw new Error(`Invalid Boards Manager URL: ${trimmed}`);
     }
-    if (!["http:", "https:", "file:"].includes(parsed.protocol)) {
+    if (parsed.protocol !== "https:") {
       throw new Error(`Unsupported Boards Manager URL protocol: ${parsed.protocol}`);
     }
     const normalized = parsed.toString();

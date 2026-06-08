@@ -10,14 +10,16 @@ describe("normalizePackageIndexUrls", () => {
       ])
     ).toEqual(["https://espressif.github.io/arduino-esp32/package_esp32_index.json"]);
 
-    expect(normalizePackageIndexUrls("https://example.com/one.json,\nfile:///tmp/two.json")).toEqual([
+    expect(normalizePackageIndexUrls("https://example.com/one.json,\nhttps://example.com/two.json")).toEqual([
       "https://example.com/one.json",
-      "file:///tmp/two.json"
+      "https://example.com/two.json"
     ]);
   });
 
   it("rejects unsupported URL protocols", () => {
     expect(() => normalizePackageIndexUrls("javascript:alert(1)")).toThrow("Unsupported Boards Manager URL protocol");
+    expect(() => normalizePackageIndexUrls("file:///tmp/package.json")).toThrow("Unsupported Boards Manager URL protocol");
+    expect(() => normalizePackageIndexUrls("http://example.com/package.json")).toThrow("Unsupported Boards Manager URL protocol");
   });
 });
 

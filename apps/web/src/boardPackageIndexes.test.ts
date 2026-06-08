@@ -7,11 +7,13 @@ describe("parsePackageIndexInput", () => {
       parsePackageIndexInput(
         "https://espressif.github.io/arduino-esp32/package_esp32_index.json,\nhttps://espressif.github.io/arduino-esp32/package_esp32_index.json file:///tmp/package.json"
       )
-    ).toEqual(["https://espressif.github.io/arduino-esp32/package_esp32_index.json", "file:///tmp/package.json"]);
+    ).toEqual(["https://espressif.github.io/arduino-esp32/package_esp32_index.json"]);
   });
 
   it("ignores unsupported or incomplete values", () => {
-    expect(parsePackageIndexInput("esp32 javascript:alert(1) https://example.com/package.json")).toEqual(["https://example.com/package.json"]);
+    expect(parsePackageIndexInput("esp32 javascript:alert(1) http://example.com/package.json https://example.com/package.json")).toEqual([
+      "https://example.com/package.json"
+    ]);
   });
 });
 

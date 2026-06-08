@@ -59,7 +59,7 @@ export function parsePackageIndexInput(value: string): string[] {
     } catch {
       continue;
     }
-    if (!["http:", "https:", "file:"].includes(parsed.protocol)) continue;
+    if (parsed.protocol !== "https:") continue;
     const normalized = parsed.toString();
     if (seen.has(normalized)) continue;
     seen.add(normalized);
