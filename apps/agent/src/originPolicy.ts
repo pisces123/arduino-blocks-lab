@@ -21,8 +21,25 @@ function parseAllowedOrigins(value: string | undefined) {
 
 export const allowedOrigins = parseAllowedOrigins(process.env.ABL_ALLOWED_ORIGINS);
 
-export function isAllowedOrigin(origin: string | undefined) {
-  if (!origin) return false;
+function isLocalHostHost(host?: string | null) {
+  if (!host) return false;
+  const normalized = host.toLowerCase();
+  return (
+    normalized === "127.0.0.1" ||
+    normalized === "localhost" ||
+    normalized.startsWith("127.") ||
+    normalized.startsWith("localhost:") ||
+    normalized.startsWith("127.0.0.1:") ||
+    normalized.endsWith(":127.0.0.1") ||
+    normalized === "::1" ||
+    normalized.includes("[::1]")
+  );
+}
+
+export function isAllowedOrigin(origin: string | undefined, requestHost?: string | undefined) {
+  if (!origin) {
+    return isLocalHostHost(requestHost);
+  }
   const normalized = originFrom(origin);
   return Boolean(normalized && allowedOrigins.has(normalized));
 }

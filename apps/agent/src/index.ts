@@ -47,7 +47,7 @@ const sockets = new Set<WebSocket>();
 const monitors = new Map<string, MonitorSession>();
 
 app.use((request, response, next) => {
-  if (!isAllowedOrigin(request.headers.origin)) {
+  if (!isAllowedOrigin(request.headers.origin, request.headers.host)) {
     response.status(403).json({ ok: false, error: "Origin is not allowed to use the Arduino Blocks Lab agent." });
     return;
   }
@@ -74,7 +74,7 @@ server.on("upgrade", (request, socket, head) => {
     return;
   }
 
-  if (!isAllowedOrigin(request.headers.origin)) {
+  if (!isAllowedOrigin(request.headers.origin, request.headers.host)) {
     socket.write("HTTP/1.1 403 Forbidden\r\n\r\n");
     socket.destroy();
     return;

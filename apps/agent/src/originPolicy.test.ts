@@ -9,8 +9,13 @@ describe("agent origin policy", () => {
     expect(isAllowedOrigin("http://127.0.0.1:4173")).toBe(true);
   });
 
-  it("allows non-browser tools without an Origin header", () => {
-    expect(isAllowedOrigin(undefined)).toBe(false);
+  it("allows local non-browser tooling on localhost", () => {
+    expect(isAllowedOrigin(undefined, "127.0.0.1:47631")).toBe(true);
+    expect(isAllowedOrigin(undefined, "localhost:47631")).toBe(true);
+  });
+
+  it("blocks non-browser tools from remote hosts", () => {
+    expect(isAllowedOrigin(undefined, "198.51.100.17:47631")).toBe(false);
   });
 
   it("blocks unrelated browser origins from driving the local agent", () => {

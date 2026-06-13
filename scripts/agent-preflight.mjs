@@ -13,6 +13,13 @@ function ok(message) {
   console.log(`OK: ${message}`);
 }
 
+function formatCliTroubleshootHint(message) {
+  if (message.includes("invalid path creating config dir") || message.includes("operation not permitted")) {
+    return "Hint: set ARDUINO_CLI_PATH or ARDUINO_DATA_DIR/ARDUINO_USER_DIR to a writable folder and rerun preflight.";
+  }
+  return "Next: install Arduino CLI and rerun this command.";
+}
+
 async function checkUrl(url) {
   try {
     const response = await fetch(url);
@@ -73,7 +80,7 @@ async function run() {
     ok(`arduino-cli reports: ${cliVersion}`);
   } catch (error) {
     fail(`arduino-cli not available: ${error instanceof Error ? error.message : String(error)}`);
-    console.log("Next: install Arduino CLI and rerun this command.");
+    console.log(formatCliTroubleshootHint(String(error instanceof Error ? error.message : String(error))));
     return 1;
   }
 

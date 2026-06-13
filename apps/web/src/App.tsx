@@ -1231,7 +1231,7 @@ export default function App() {
     applyProjectStyle(newProjectStyle);
     setNewProjectOpen(false);
     setAgentLog((current) => [
-      `Created Project 1 in ${projectStyleOptions.find((option) => option.id === newProjectStyle)?.title ?? "Blocks"}.`,
+      `Created Project 1 in ${projectStyleOptions.find((option) => option.id === newProjectStyle)?.title ?? "Word Blocks"}.`,
       ...current
     ]);
   }
