@@ -77,8 +77,7 @@ html[data-theme="dark"] {
 html {
   width: 100%;
   height: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 body {
@@ -87,16 +86,18 @@ body {
   min-width: 0;
   min-height: 100%;
   min-height: 100vh;
+  height: 100%;
   background: var(--page-wash);
   color: var(--ink);
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 #root {
-  min-height: 100vh;
   width: 100%;
+  min-height: 100%;
   min-height: 100vh;
+  height: 100%;
+  width: 100%;
 }
 
 .app-crash-shell {
@@ -549,10 +550,11 @@ button:disabled {
 
 .app-shell {
   min-height: 100vh;
+  height: min(100dvh, 100%);
   background: var(--page-wash);
   display: flex;
   flex-direction: column;
-  overflow: visible;
+  overflow: hidden;
   min-width: 0;
 }
 
@@ -720,7 +722,7 @@ button:disabled {
   border-bottom: 1px solid var(--line);
   background: color-mix(in srgb, var(--soft-blue) 84%, transparent);
   overflow-x: auto;
-  overflow-y: visible;
+  overflow-y: hidden;
   white-space: nowrap;
 }
 
@@ -744,13 +746,13 @@ button:disabled {
 .workspace-grid {
   min-height: 0;
   width: 100%;
+  flex: 1 1 auto;
   display: grid;
   grid-template-columns: minmax(240px, 280px) minmax(0, 1fr) minmax(290px, 330px);
   gap: 14px;
   padding: 14px;
   align-items: start;
-  overflow: visible;
-  min-height: 0;
+  overflow: hidden;
   overscroll-behavior: auto;
 }
 
@@ -791,11 +793,11 @@ button:disabled {
 .right-panel {
   min-height: 0;
   min-width: 0;
-  flex: 1;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   gap: 14px;
-  overflow: visible;
+  overflow: auto;
 }
 
 .panel-section,
@@ -806,6 +808,7 @@ button:disabled {
   border-radius: 8px;
   background: var(--panel);
   box-shadow: var(--shadow);
+  overflow: hidden;
 }
 
 .panel-section {
@@ -814,7 +817,14 @@ button:disabled {
   flex: 0 0 auto;
   gap: 10px;
   padding: 12px;
-  overflow: visible;
+  overflow: hidden;
+}
+
+.catalog-list,
+.starter-list,
+.agent-log {
+  min-height: 0;
+  overflow: auto;
 }
 
 .section-heading {
@@ -1556,7 +1566,7 @@ button:disabled {
 .main-panel {
   min-width: 0;
   min-height: 0;
-  overflow: visible;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -5645,6 +5655,7 @@ html[data-theme="dark"] .breadboard-model {
 
   .app-shell {
     min-height: 100vh;
+    height: min(100dvh, 100%);
   }
 
   .app-shell > * {
@@ -5758,12 +5769,13 @@ html[data-theme="dark"] .breadboard-model {
     flex-wrap: wrap;
     gap: 8px;
     padding: 8px 14px;
-    overflow: visible;
+    overflow-x: auto;
+    overflow-y: hidden;
   }
 
   .workspace-grid {
     grid-template-columns: 1fr;
-    overflow: visible;
+    overflow: hidden;
     min-height: 0;
   }
 
@@ -5777,7 +5789,7 @@ html[data-theme="dark"] .breadboard-model {
   .workspace-grid.mode-blocks.style-blocks .right-panel {
     padding: 0;
     border: 0;
-    overflow: visible;
+    overflow: auto;
   }
 
   .workspace-grid.mode-blocks.style-blocks .main-panel {

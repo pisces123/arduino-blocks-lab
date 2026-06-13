@@ -148,7 +148,7 @@ const projectStyleOptions: Array<{
   },
   {
     id: "blocks",
-    title: "Blocks",
+    title: "Word Blocks",
     kicker: "blocks-first",
     detail: "Build with word-style blocks and live Arduino C++ preview."
   },
@@ -960,7 +960,7 @@ export default function App() {
           : `${wiringCanvas.summary.total} ready`;
   const activeStyleOption = projectStyleOptions.find((option) => option.id === projectStyle) ?? {
     id: "blocks",
-    title: "Blocks",
+    title: "Word Blocks",
     kicker: "scratch-style",
     detail: "Build with word-style blocks and live Arduino C++."
   };
@@ -1915,7 +1915,7 @@ export default function App() {
               ) : (
                 <SquareStack size={15} />
               )}
-              <span>{option.id === "icon" ? "Icon Blocks" : option.id === "blocks" ? "Blocks" : "Arduino C++"}</span>
+              <span>{option.id === "icon" ? "Icon Blocks" : option.id === "blocks" ? "Word Blocks" : "Arduino C++"}</span>
             </button>
           ))}
         </div>
