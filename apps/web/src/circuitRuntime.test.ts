@@ -39,6 +39,34 @@ describe("circuit runtime", () => {
     expect(afterTwoMore.serialLog.join("\n")).toContain("digital 13 = LOW");
   });
 
+  it("consumes delay in wall-clock chunks so long waits keep advancing", () => {
+    const blinkLedId = starterProjects.blink.components[0]?.id;
+    const project = {
+      ...starterProjects.blink,
+      program: [
+        { kind: "digital-write", componentId: blinkLedId, value: "HIGH" },
+        { kind: "delay", ms: 1000 },
+        { kind: "digital-write", componentId: blinkLedId, value: "LOW" }
+      ] as ProgramStep[]
+    };
+
+    const runtime = createRuntimeFromProject(project);
+    const oneTick = runtime.run(10, 180);
+    expect(oneTick.stepIndex).toBeGreaterThanOrEqual(2);
+    expect(oneTick.pinValues["13"]).toBe("HIGH");
+    expect(oneTick.delayRemainingMs).toBeLessThan(1000);
+    expect(oneTick.delayRemainingMs).toBeGreaterThan(700);
+
+    const secondTick = runtime.run(10, 180);
+    expect(secondTick.stepIndex).toBeGreaterThanOrEqual(3);
+    expect(secondTick.pinValues["13"]).toBe("HIGH");
+    expect(secondTick.delayRemainingMs).toBeLessThan(oneTick.delayRemainingMs ?? Infinity);
+
+    const fullTick = runtime.run(20, 1200);
+    expect(fullTick.halted).toBeUndefined();
+    expect(fullTick.serialLog.join("\n")).toContain("digital 13 = LOW");
+  });
+
   it("maps component pins to board pins for behavior blocks", () => {
     const runtime = createRuntimeFromProject(starterProjects.servoKnob);
     const servoId = starterProjects.servoKnob.components[1]?.id;
@@ -87,6 +115,27 @@ describe("circuit runtime", () => {
 
     expect(snapshot.warnings).toEqual(expect.arrayContaining([expect.stringContaining("Unsupported") ]));
     expect(snapshot.serialLog).toEqual(expect.arrayContaining(["digital 13 = HIGH"]));
+  });
+
+  it("loops program blocks continuously instead of stopping after one cycle", () => {
+    const runtime = createRuntimeFromProject({
+      ...starterProjects.blink,
+      program: [
+        { kind: "digital-write", componentId: starterProjects.blink.components[0]?.id, value: "HIGH" },
+        { kind: "digital-write", componentId: starterProjects.blink.components[0]?.id, value: "LOW" }
+      ] as ProgramStep[]
+    });
+
+    const first = runtime.run(1);
+    const second = runtime.run(1);
+    const third = runtime.run(1);
+
+    expect(first.pinValues["13"]).toBe("HIGH");
+    expect(second.pinValues["13"]).toBe("LOW");
+    expect(third.pinValues["13"]).toBe("HIGH");
+    expect(first.halted).toBeUndefined();
+    expect(second.halted).toBeUndefined();
+    expect(third.halted).toBeUndefined();
   });
 
   it("halts while-pin loops that get stuck and adds safety warnings", () => {

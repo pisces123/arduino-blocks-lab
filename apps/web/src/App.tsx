@@ -142,15 +142,15 @@ const projectStyleOptions: Array<{
 }> = [
   {
     id: "icon",
-    title: "Icon Blocks",
+    title: "Word Blocks",
     kicker: "picture-first",
     detail: "Build with icon-plus-word blocks and guided steps."
   },
   {
     id: "blocks",
-    title: "Word Blocks",
+    title: "Blocks",
     kicker: "blocks-first",
-    detail: "Build with word-style blocks and live Arduino C++ preview."
+    detail: "Build with text-style blocks and live Arduino C++ preview."
   },
   {
     id: "code",
@@ -731,14 +731,14 @@ export default function App() {
   }, []);
 
   const runSimulationStep = useCallback(
-    (runtime: CircuitRuntimeController, maxOperations: number) => {
-      const snapshot = runtime.run(maxOperations);
+    (runtime: CircuitRuntimeController, maxOperations: number, elapsedMs: number) => {
+      const snapshot = runtime.run(maxOperations, elapsedMs);
       persistRuntimeSnapshot(snapshot);
       if (snapshot.halted || !snapshot.running || runtime.isStopped()) {
         stopSimulationLoop();
       }
     },
-    [stopSimulationLoop]
+    [stopSimulationLoop, simulationSpeedMs]
   );
 
   const startSimulationLoop = useCallback(() => {
@@ -751,7 +751,7 @@ export default function App() {
       persistRuntimeSnapshot(resetSnapshot);
     }
 
-    runSimulationStep(runtime, 10);
+    runSimulationStep(runtime, 10, simulationSpeedMs);
     if (runtime.isStopped()) {
       setSimulationRunning(false);
       return;
@@ -765,7 +765,7 @@ export default function App() {
         stopSimulationLoop();
         return;
       }
-      runSimulationStep(nextRuntime, 10);
+      runSimulationStep(nextRuntime, 10, speed);
     }, speed);
   }, [runSimulationStep, simulationSpeedMs, stopSimulationLoop]);
 
@@ -960,9 +960,9 @@ export default function App() {
           : `${wiringCanvas.summary.total} ready`;
   const activeStyleOption = projectStyleOptions.find((option) => option.id === projectStyle) ?? {
     id: "blocks",
-    title: "Word Blocks",
+    title: "Blocks",
     kicker: "scratch-style",
-    detail: "Build with word-style blocks and live Arduino C++."
+    detail: "Build with text-style blocks and live Arduino C++."
   };
   const missionProgression = useMemo(() => createMissionProgression(activeCatalog.lessons, missionProgress), [activeCatalog.lessons, missionProgress]);
   const teacherUnitPlan = useMemo(() => createUnitPlan(activeCatalog.lessons, activeCatalog), [activeCatalog]);
@@ -1915,7 +1915,7 @@ export default function App() {
               ) : (
                 <SquareStack size={15} />
               )}
-              <span>{option.id === "icon" ? "Icon Blocks" : option.id === "blocks" ? "Word Blocks" : "Arduino C++"}</span>
+              <span>{option.id === "icon" ? "Word Blocks" : option.id === "blocks" ? "Blocks" : "Arduino C++"}</span>
             </button>
           ))}
         </div>

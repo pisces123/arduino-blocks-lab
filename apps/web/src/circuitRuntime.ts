@@ -54,7 +54,7 @@ type RuntimeConfig = {
 };
 
 export type CircuitRuntimeController = {
-  run: (maxOperations?: number) => CircuitRuntimeSnapshot;
+  run: (maxOperations?: number, elapsedMs?: number) => CircuitRuntimeSnapshot;
   step: () => CircuitRuntimeSnapshot;
   reset: (state?: SimulationState) => void;
   pause: () => void;
@@ -799,7 +799,7 @@ export function createCircuitRuntime(config: RuntimeConfig): CircuitRuntimeContr
     return null;
   }
 
-  function runStep(maxOperations: number) {
+  function runStep(maxOperations: number, elapsedMs = 0) {
     if (state.halted === "blocked") return getSnapshot();
     if (!state.running) {
       state.running = true;
@@ -807,10 +807,26 @@ export function createCircuitRuntime(config: RuntimeConfig): CircuitRuntimeContr
     }
 
     let operations = 0;
+    let budgetMs = Math.max(0, Number(elapsedMs) || 0);
     while (operations < maxOperations && !state.halted) {
       if (!state.running) break;
 
       if (state.delayRemainingMs > 0) {
+        if (budgetMs > 0) {
+          const consumedMs = Math.min(state.delayRemainingMs, budgetMs);
+          state.delayRemainingMs = Math.max(0, state.delayRemainingMs - consumedMs);
+          budgetMs = Math.max(0, budgetMs - consumedMs);
+          state.stepIndex += 1;
+          operations += 1;
+          if (state.delayRemainingMs === 0) {
+            appendSerialLine("delay complete");
+          }
+          if (state.delayRemainingMs > 0) {
+            break;
+          }
+          continue;
+        }
+
         state.delayRemainingMs = Math.max(0, state.delayRemainingMs - 1);
         state.stepIndex += 1;
         operations += 1;
@@ -894,7 +910,7 @@ export function createCircuitRuntime(config: RuntimeConfig): CircuitRuntimeContr
   resetState(config.initialState);
 
   return {
-    run: (maxOperations = MAX_RUN_STEPS) => runStep(maxOperations),
+    run: (maxOperations = MAX_RUN_STEPS, elapsedMs = 0) => runStep(maxOperations, elapsedMs),
     step: () => runStep(1),
     reset: (nextState) => resetState(nextState),
     pause,
