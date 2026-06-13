@@ -77,7 +77,8 @@ html[data-theme="dark"] {
 html {
   width: 100%;
   height: 100%;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 body {
@@ -88,11 +89,13 @@ body {
   min-height: 100vh;
   background: var(--page-wash);
   color: var(--ink);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 #root {
-  height: 100%;
+  min-height: 100vh;
+  width: 100%;
   min-height: 100vh;
 }
 
@@ -161,6 +164,8 @@ body {
 }
 
 .landing-shell {
+  position: relative;
+  isolation: isolate;
   min-height: 100vh;
   height: auto;
   overflow: visible;
@@ -170,6 +175,44 @@ body {
     linear-gradient(115deg, rgba(138, 217, 255, 0.48), transparent 42%),
     var(--paper);
   color: var(--ink);
+  padding-bottom: 38px;
+}
+
+.landing-orbit {
+  position: absolute;
+  border-radius: 999px;
+  pointer-events: none;
+  filter: blur(0.1px);
+  mix-blend-mode: screen;
+  z-index: -1;
+  opacity: 0.48;
+}
+
+.landing-orbit.orbit-a {
+  width: 320px;
+  height: 320px;
+  left: -90px;
+  top: 50px;
+  background: radial-gradient(circle at 30% 30%, var(--piplup), transparent 62%);
+  animation: drift-right 12s ease-in-out infinite;
+}
+
+.landing-orbit.orbit-b {
+  width: 220px;
+  height: 220px;
+  right: -52px;
+  top: 240px;
+  background: radial-gradient(circle at 70% 30%, var(--soft-blue), transparent 62%);
+  animation: drift-left 14s ease-in-out infinite;
+}
+
+.landing-orbit.orbit-c {
+  width: 240px;
+  height: 240px;
+  right: 40%;
+  bottom: 80px;
+  background: radial-gradient(circle at 20% 70%, var(--soft-amber), transparent 68%);
+  animation: drift-up 11s ease-in-out infinite;
 }
 
 .landing-hero {
@@ -884,11 +927,11 @@ button:disabled {
 }
 
 .app-shell {
-  min-height: 0;
-  height: 100%;
-  display: grid;
-  grid-template-rows: auto auto auto;
-  overflow: hidden;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: visible;
   min-height: 100vh;
 }
 
@@ -1079,12 +1122,13 @@ button:disabled {
 
 .workspace-grid {
   min-height: 0;
+  flex: 1;
   display: grid;
   grid-template-columns: minmax(240px, 280px) minmax(0, 1fr) minmax(290px, 330px);
   gap: 14px;
   padding: 14px;
   align-items: stretch;
-  overflow: hidden;
+  overflow: auto;
   min-height: 0;
 }
 

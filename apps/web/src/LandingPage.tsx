@@ -13,6 +13,9 @@ type Props = {
 export default function LandingPage({ boardCount, componentCount, lessonCount, onStart, onOpenCircuit, onOpenCode, onOpenLessons }: Props) {
   return (
     <main className="landing-shell">
+      <div className="landing-orbit orbit-a" />
+      <div className="landing-orbit orbit-b" />
+      <div className="landing-orbit orbit-c" />
       <section className="landing-hero" aria-labelledby="landing-title">
         <nav className="landing-nav" aria-label="Landing navigation">
           <div className="landing-brand">
@@ -32,8 +35,7 @@ export default function LandingPage({ boardCount, componentCount, lessonCount, o
             </span>
             <h1 id="landing-title">Arduino Blocks Lab</h1>
             <p>
-              Start with blocks, read the Arduino C++ beside them, check the wiring, then flash a real Uno, Nano, or Mega from
-              the local agent.
+              Start in blocks, keep code visible the whole time, and upload to a real Uno, Nano, or Mega using your local helper.
             </p>
             <div className="landing-actions">
               <button className="landing-primary" onClick={onStart}>
@@ -42,21 +44,21 @@ export default function LandingPage({ boardCount, componentCount, lessonCount, o
               </button>
               <button className="landing-secondary" onClick={onOpenCode}>
                 <Code2 size={18} />
-                View Arduino C++
+                Open code workspace
               </button>
             </div>
             <ul className="landing-trust-line">
               <li>
                 <Cable size={16} />
-                Real USB upload path through Arduino CLI
+                Real USB upload path through local Arduino CLI
               </li>
               <li>
                 <CircuitBoard size={16} />
-                Pin and wiring checks before class hardware
+                Wiring checks before you wire hardware
               </li>
               <li>
                 <SquareStack size={16} />
-                Icon blocks, Blockly blocks, and Arduino C++
+                Icon blocks, standard blocks, and Arduino C++
               </li>
             </ul>
           </div>
@@ -121,7 +123,7 @@ export default function LandingPage({ boardCount, componentCount, lessonCount, o
       <section className="landing-band" aria-label="Project entry points">
         <div className="landing-band-heading">
           <span>Choose a station</span>
-          <strong>Move from first lesson to real upload without losing the thread.</strong>
+          <strong>Move from first lesson to real uploads in one smooth path.</strong>
         </div>
         <div className="landing-stat-row">
           <span>

@@ -121,8 +121,7 @@ function safeToolboxDefinition(): Blockly.utils.toolbox.ToolboxDefinition {
   const filteredCategories = toolbox.contents
     .map((category) => ({
       ...category,
-      contents: category.contents.filter((entry) => entry.kind !== "block" || Boolean(Blockly.Blocks[entry.type])
-      )
+      contents: category.contents.filter((entry) => entry.kind !== "block" || Boolean(Blockly.Blocks[entry.type]))
     }))
     .filter((category) => category.contents.length > 0)
     .map((category) => ({
@@ -131,6 +130,20 @@ function safeToolboxDefinition(): Blockly.utils.toolbox.ToolboxDefinition {
       colour: category.colour,
       contents: category.contents
     }));
+
+  if (filteredCategories.length === 0) {
+    return {
+      kind: "categoryToolbox",
+      contents: [
+        {
+          kind: "category",
+          name: "Blocks",
+          colour: "#12a988",
+          contents: [{ kind: "block", type: "abl_delay" }]
+        }
+      ]
+    };
+  }
 
   return {
     kind: "categoryToolbox",
@@ -148,6 +161,7 @@ export default function BlocklyWorkspace({ components, componentDefinitions, xml
   const lastLoadedXml = useRef<string>("");
   const lastReloadKey = useRef<string>("");
   const [workspaceError, setWorkspaceError] = useState<string | null>(null);
+  const mountedRef = useRef(true);
 
   const componentsRef = useRef(components);
   const componentDefinitionsRef = useRef(componentDefinitions);
@@ -158,8 +172,19 @@ export default function BlocklyWorkspace({ components, componentDefinitions, xml
     onChangeRef.current = onChange;
   }, [onChange]);
 
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      if (syncFrameRef.current !== null) {
+        window.cancelAnimationFrame(syncFrameRef.current);
+        syncFrameRef.current = null;
+      }
+    };
+  }, []);
+
   const syncProjectFromWorkspace = useCallback((workspace: Blockly.WorkspaceSvg) => {
-    if (loadingRef.current) return;
+    if (!mountedRef.current || loadingRef.current) return;
     try {
       const dom = Blockly.Xml.workspaceToDom(workspace);
       const blocksXml = Blockly.Xml.domToText(dom);
@@ -175,17 +200,19 @@ export default function BlocklyWorkspace({ components, componentDefinitions, xml
       }
     } catch (error) {
       console.error("Unable to sync workspace changes", error);
-      setWorkspaceError("Blockly sync failed for this change. The workspace will keep running, but code generation may pause until recovered.");
+      setWorkspaceError("Blockly sync failed for this change. Try Recover blocks to keep going.");
     }
   }, []);
 
   const scheduleSync = useCallback(
     (workspace: Blockly.WorkspaceSvg) => {
+      if (!mountedRef.current) return;
       if (syncFrameRef.current !== null) {
         window.cancelAnimationFrame(syncFrameRef.current);
       }
       syncFrameRef.current = window.requestAnimationFrame(() => {
         syncFrameRef.current = null;
+        if (!mountedRef.current || workspaceRef.current !== workspace) return;
         syncProjectFromWorkspace(workspace);
       });
     },
@@ -196,17 +223,24 @@ export default function BlocklyWorkspace({ components, componentDefinitions, xml
     const workspace = workspaceRef.current;
     if (!workspace) return;
     loadingRef.current = true;
-    workspace.clear();
-    lastWorkspaceXml.current = "";
-    loadingRef.current = false;
-    syncProjectFromWorkspace(workspace);
-    setWorkspaceError(null);
+    try {
+      workspace.clear();
+      lastWorkspaceXml.current = "";
+      syncProjectFromWorkspace(workspace);
+      setWorkspaceError(null);
+    } finally {
+      loadingRef.current = false;
+    }
   }, [syncProjectFromWorkspace]);
 
   useEffect(() => {
     setBlocklyComponentProvider(() => componentsRef.current);
     setBlocklyComponentDefinitionProvider(() => componentDefinitionsRef.current);
     registerArduinoBlocks();
+    if (workspaceRef.current) {
+      workspaceRef.current.dispose();
+      workspaceRef.current = null;
+    }
 
     if (!containerRef.current) return;
     const compactWorkspace = window.matchMedia("(max-width: 620px)").matches;
@@ -255,7 +289,7 @@ export default function BlocklyWorkspace({ components, componentDefinitions, xml
 
   useEffect(() => {
     const workspace = workspaceRef.current;
-    if (!workspace) return;
+    if (!workspace || !mountedRef.current) return;
     if (syncFrameRef.current !== null) {
       window.cancelAnimationFrame(syncFrameRef.current);
       syncFrameRef.current = null;
@@ -289,6 +323,7 @@ export default function BlocklyWorkspace({ components, componentDefinitions, xml
       }
       workspace.refreshToolboxSelection();
     } catch (error) {
+      if (!mountedRef.current) return;
       console.error("Failed to load Blockly XML. Falling back to empty canvas.", error);
       workspace.clear();
       lastLoadedXml.current = emptyBlocklyXml;
@@ -302,6 +337,7 @@ export default function BlocklyWorkspace({ components, componentDefinitions, xml
 
   useEffect(() => {
     const workspace = workspaceRef.current;
+    if (!mountedRef.current) return;
     workspace?.setTheme(blocklyThemeFor(themePreference));
     workspace?.refreshToolboxSelection();
   }, [themePreference]);
@@ -310,14 +346,6 @@ export default function BlocklyWorkspace({ components, componentDefinitions, xml
     setBlocklyComponentProvider(() => componentsRef.current);
     setBlocklyComponentDefinitionProvider(() => componentDefinitionsRef.current);
   }, [components, componentDefinitions]);
-
-  useEffect(() => {
-    return () => {
-      if (syncFrameRef.current !== null) {
-        window.cancelAnimationFrame(syncFrameRef.current);
-      }
-    };
-  }, []);
 
   return (
     <div className="block-studio">

@@ -145,9 +145,9 @@ const projectStyleOptions: Array<{
   },
   {
     id: "blocks",
-    title: "Word Blocks",
-    kicker: "word-first blocks",
-    detail: "Build with full block words and live Arduino C++."
+    title: "Blocks",
+    kicker: "blocks-first",
+    detail: "Build with full coding blocks and live Arduino C++ preview."
   },
   {
     id: "code",
@@ -649,20 +649,38 @@ export default function App() {
     [project.boardId, project.components, project.program, project.connections, project.pinAssignments]
   );
   useEffect(() => {
-    const runtime = createCircuitRuntime({
-      project: {
-        components: project.components,
-        program: project.program,
-        pinAssignments: project.pinAssignments,
-        connections: project.connections,
-        simulationState: project.simulationState
-      },
-      definitions: activeCatalog.components,
-      initialState: project.simulationState
-    });
+    let cancelled = false;
+    try {
+      const runtime = createCircuitRuntime({
+        project: {
+          components: project.components,
+          program: project.program,
+          pinAssignments: project.pinAssignments,
+          connections: project.connections,
+          simulationState: project.simulationState
+        },
+        definitions: activeCatalog.components,
+        initialState: project.simulationState
+      });
+      if (cancelled) {
+        return;
+      }
+      circuitRuntimeRef.current = runtime;
+      setRuntimeSnapshot(runtime.getSnapshot());
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not rebuild circuit simulation runtime.";
+      console.error("Failed to initialize circuit runtime.", error);
+      setRuntimeSnapshot((current) => ({
+        ...current,
+        warnings: [`Circuit simulation unavailable: ${message}`],
+        running: false
+      }));
+      setAgentLog((current) => [`Circuit simulation unavailable: ${message}`, ...current]);
+    }
 
-    circuitRuntimeRef.current = runtime;
-    setRuntimeSnapshot(runtime.getSnapshot());
+    return () => {
+      cancelled = true;
+    };
   }, [activeCatalog.components, circuitRuntimeSeed, project.boardId, project.components, project.pinAssignments, project.program, project.connections]);
 
   const uploadReadiness = useMemo(
@@ -816,9 +834,9 @@ export default function App() {
           : `${wiringCanvas.summary.total} ready`;
   const activeStyleOption = projectStyleOptions.find((option) => option.id === projectStyle) ?? {
     id: "blocks",
-    title: "Word Blocks",
+    title: "Blocks",
     kicker: "scratch-style",
-    detail: "Build with full Blockly-style words and live Arduino C++."
+    detail: "Build with full coding blocks and live Arduino C++."
   };
   const missionProgression = useMemo(() => createMissionProgression(activeCatalog.lessons, missionProgress), [activeCatalog.lessons, missionProgress]);
   const teacherUnitPlan = useMemo(() => createUnitPlan(activeCatalog.lessons, activeCatalog), [activeCatalog]);
@@ -1063,7 +1081,7 @@ export default function App() {
     applyProjectStyle(newProjectStyle);
     setNewProjectOpen(false);
     setAgentLog((current) => [
-      `Created Project 1 in ${projectStyleOptions.find((option) => option.id === newProjectStyle)?.title ?? "Text Blocks"}.`,
+      `Created Project 1 in ${projectStyleOptions.find((option) => option.id === newProjectStyle)?.title ?? "Blocks"}.`,
       ...current
     ]);
   }
@@ -1690,7 +1708,7 @@ export default function App() {
               title={option.title}
             >
               {option.id === "code" ? <Code2 size={15} /> : <SquareStack size={15} />}
-              <span>{option.id === "icon" ? "Icon Blocks" : option.id === "blocks" ? "Word Blocks" : "Arduino C++"}</span>
+              <span>{option.id === "icon" ? "Icon Blocks" : option.id === "blocks" ? "Blocks" : "Arduino C++"}</span>
             </button>
           ))}
         </div>
